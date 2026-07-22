@@ -664,7 +664,22 @@
       <h2>Implementing hubs</h2>
       <p class="section-sub">Hubs are the member organisations that run the journey on the ground — distinct from funders, who resource it. More than one hub can co-implement the same nomenclature in the same year. Click a hub for the years and tracks it's carried.</p>
       <div class="funder-grid" id="hubOrgGrid"></div>
-    </section>
+      </section>
+
+   <section id="roster">
+     <h2>Changeloomers roster · by batch &amp; type</h2>
+     <p class="section-sub">Built from the "CL DATA CHESHTA" tab — count of people per cohort batch and per programme type.</p>
+     <div style="display:grid; grid-template-columns:1fr 1fr; gap:32px;">
+       <div>
+         <h3 style="font-size:15px; margin:0 0 12px;">By batch year</h3>
+         <div id="batchChart"></div>
+       </div>
+       <div>
+         <h3 style="font-size:15px; margin:0 0 12px;">By type</h3>
+         <div id="typeChart"></div>
+       </div>
+     </div>
+   </section>
   </main>
 </div>
 
@@ -791,6 +806,7 @@ let MILESTONES = [
 // "Hubs" and "Hub_Implementation" tabs whenever that data is ready.
 let HUB_ORGS = [];          // {id, name, desc}
 let HUB_IMPLEMENTATIONS = []; // {hub, nomenclature, year}
+  let ROSTER = []; // {anchor, org, type, batch, link}
 
 function hubsForNomYear(nomName, year){
   return HUB_IMPLEMENTATIONS
@@ -878,6 +894,16 @@ function applySheetData(data){
         nomenclature: String(r.Nomenclature).trim(),
         year: String(r.Year).trim()
       })); // can legitimately be empty — populate "Hub_Implementation" whenever ready
+  }if(data.clRoster){
+    ROSTER = data.clRoster
+      .filter(r => r["Name of the Anchor"] && String(r["Name of the Anchor"]).trim())
+      .map(r => ({
+        anchor: String(r["Name of the Anchor"]||"").trim(),
+        org: String(r["Name of Organisation"]||"").trim(),
+        type: String(r["Type"]||"").trim(),
+        batch: String(r["Changeloomers Batch"]||"").trim(),
+        link: String(r["Link to Story and Picture"]||"").trim()
+      }));
   }
 }
 
@@ -1368,8 +1394,43 @@ function buildChart(){
 }
 /* ============ BOOT ============ */
 
-async function render(){
-  const steps = [renderLegend, renderStats, renderFunders, renderNomCards, renderHubOrgs, renderNomBubbles, renderFunderBubbles, buildChart];
+function renderRoster(){
+     const batchEl = document.getElementById("batchChart");
+     const typeEl = document.getElementById("typeChart");
+     if(!batchEl || !typeEl) return;
+
+     if(!ROSTER.length){
+       batchEl.innerHTML = `<div class="pending-pill">No roster data yet — check the "CL DATA CHESHTA" tab.</div>`;
+       typeEl.innerHTML = "";
+       return;
+     }
+
+     const byBatch = {}, byType = {};
+     ROSTER.forEach(r=>{
+       if(r.batch) byBatch[r.batch] = (byBatch[r.batch]||0) + 1;
+       if(r.type) byType[r.type] = (byType[r.type]||0) + 1;
+     });
+
+     const barsHTML = (obj)=>{
+       const entries = Object.entries(obj).sort((a,b)=> a[0].localeCompare(b[0]));
+       const max = Math.max(...entries.map(e=>e[1]), 1);
+       return entries.map(([label,count])=>`
+         <div style="margin-bottom:8px;">
+           <div style="display:flex; justify-content:space-between; font-size:12.5px; margin-bottom:3px;">
+             <span>${label}</span><span>${count}</span>
+           </div>
+           <div style="background:#EFE9DD; border-radius:4px; height:10px;">
+             <div style="width:${(count/max*100).toFixed(0)}%; background:#8B5E3C; height:10px; border-radius:4px;"></div>
+           </div>
+         </div>
+       `).join("");
+     };
+
+     batchEl.innerHTML = barsHTML(byBatch);
+     typeEl.innerHTML = barsHTML(byType);
+  
+   }async function render(){
+  const steps = [renderLegend, renderStats, renderFunders, renderNomCards, renderHubOrgs, renderRoster,renderNomBubbles, renderFunderBubbles, buildChart];
   steps.forEach(step=>{
     try{ step(); }
     catch(err){ console.error(`${step.name}() failed — skipping so the rest of the page still renders:`, err); }
