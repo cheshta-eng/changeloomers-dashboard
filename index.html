@@ -6,6 +6,7 @@
 
 
 
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -1720,93 +1721,114 @@ async function renderIndiaMap(){
   const wrap = document.getElementById("indiaMapWrap");
   if(!wrap) return;
 
+  // Diagnostic line rendered directly on the page — no dev tools needed.
+  let diag = document.getElementById("indiaMapDiag");
+  if(!diag){
+    diag = document.createElement("div");
+    diag.id = "indiaMapDiag";
+    diag.style.cssText = "margin-top:10px; font-family:'IBM Plex Mono', monospace; font-size:11px; color:rgba(255,255,255,0.55); line-height:1.6;";
+    wrap.parentNode.insertBefore(diag, wrap.nextSibling);
+  }
+
   if(!ROSTER.length){
     wrap.innerHTML = `<div class="pending-pill">No roster data yet — check the "CL DATA CHESHTA" tab.</div>`;
+    diag.textContent = "";
     return;
   }
 
-  if(!INDIA_SVG_TEXT){
-    try{
+  try{
+    if(!INDIA_SVG_TEXT){
       const res = await fetch("https://cdn.jsdelivr.net/npm/@svg-maps/india@2.0.0/india.svg");
-      if(!res.ok) throw new Error("bad response: " + res.status);
+      if(!res.ok) throw new Error("Map file request failed: HTTP " + res.status);
       INDIA_SVG_TEXT = await res.text();
-    }catch(err){
-      wrap.innerHTML = `<div class="pending-pill">Map couldn't load right now — try refreshing the page.</div>`;
-      console.warn("India map SVG failed to load:", err);
-      return;
+      if(!INDIA_SVG_TEXT || INDIA_SVG_TEXT.indexOf("<svg") === -1){
+        throw new Error("Map file loaded but didn't contain valid SVG content");
+      }
     }
+
+    wrap.innerHTML = INDIA_SVG_TEXT;
+    const svgEl = wrap.querySelector("svg");
+    if(!svgEl) throw new Error("SVG loaded but no <svg> element found after inserting into the page");
+    svgEl.style.width = "100%";
+    svgEl.style.height = "auto";
+    svgEl.style.display = "block";
+
+    const byState = {};
+    ROSTER.forEach(r=>{
+      if(!r.state) return;
+      const official = resolveStateName(r.state);
+      if(!official) return;
+      if(!byState[official]) byState[official] = [];
+      byState[official].push(r);
+    });
+    const maxCount = Math.max(1, ...Object.values(byState).map(a=> a.length));
+    const labelsGroup = document.createElementNS("http://www.w3.org/2000/svg","g");
+
+    const allPaths = svgEl.querySelectorAll("path");
+    const sample = Array.from(allPaths).slice(0,3).map(p=>
+      `name="${p.getAttribute("name")}" id="${p.getAttribute("id")}"`
+    ).join("  |  ");
+
+    let matchedCount = 0;
+
+    allPaths.forEach(path=>{
+      const stateName = getPathStateName(path);
+      const entries = byState[stateName] || [];
+      const count = entries.length;
+      if(count) matchedCount++;
+
+      if(count){
+        const intensity = 0.55 + 0.45 * (count / maxCount);
+        path.style.fill = `rgba(217,151,29, ${intensity})`;
+      } else {
+        path.style.fill = "rgba(255,255,255,0.05)";
+      }
+      path.style.stroke = "#FFFDF6";
+      path.style.strokeWidth = "0.6";
+      path.style.cursor = count ? "pointer" : "default";
+
+      if(count){
+        path.addEventListener("click", ()=> openStateModal(stateName, entries));
+        const titleEl = document.createElementNS("http://www.w3.org/2000/svg","title");
+        titleEl.textContent = `${stateName} — ${count}`;
+        path.appendChild(titleEl);
+
+        try{
+          const box = path.getBBox();
+          const cx = box.x + box.width/2;
+          const cy = box.y + box.height/2;
+          const circle = document.createElementNS("http://www.w3.org/2000/svg","circle");
+          circle.setAttribute("cx", cx); circle.setAttribute("cy", cy); circle.setAttribute("r", 9);
+          circle.setAttribute("fill", "#2B241F");
+          circle.setAttribute("stroke", "#FFFDF6");
+          circle.setAttribute("stroke-width", "1");
+          circle.style.pointerEvents = "none";
+          const label = document.createElementNS("http://www.w3.org/2000/svg","text");
+          label.setAttribute("x", cx); label.setAttribute("y", cy + 3.5);
+          label.setAttribute("text-anchor", "middle");
+          label.setAttribute("font-family", "IBM Plex Mono, monospace");
+          label.setAttribute("font-size", "9");
+          label.setAttribute("font-weight", "700");
+          label.setAttribute("fill", "#FFFDF6");
+          label.style.pointerEvents = "none";
+          label.textContent = count;
+          labelsGroup.appendChild(circle);
+          labelsGroup.appendChild(label);
+        }catch(e){ /* getBBox can fail on disconnected nodes — skip label if so */ }
+      }
+    });
+
+    svgEl.appendChild(labelsGroup);
+
+    diag.innerHTML =
+      `Diagnostic: found ${allPaths.length} map regions, matched ${matchedCount} to sheet data.<br>` +
+      `States found in your sheet: ${Object.keys(byState).join(", ") || "(none matched)"}<br>` +
+      `Sample map region attributes: ${sample}`;
+
+  }catch(err){
+    wrap.innerHTML = `<div class="pending-pill">Map error: ${err.message}</div>`;
+    diag.textContent = "";
   }
-
-  wrap.innerHTML = INDIA_SVG_TEXT;
-  const svgEl = wrap.querySelector("svg");
-  if(!svgEl) return;
-  svgEl.style.width = "100%";
-  svgEl.style.height = "auto";
-  svgEl.style.display = "block";
-
-  const byState = {};
-  ROSTER.forEach(r=>{
-    if(!r.state) return;
-    const official = resolveStateName(r.state);
-    if(!official) return; // unrecognised state name — silently skipped, fix spelling in the sheet to include it
-    if(!byState[official]) byState[official] = [];
-    byState[official].push(r);
-  });
-  const maxCount = Math.max(1, ...Object.values(byState).map(a=> a.length));
-  const labelsGroup = document.createElementNS("http://www.w3.org/2000/svg","g");
-
-  const allPaths = svgEl.querySelectorAll("path");
-  console.log("India map: found " + allPaths.length + " <path> elements. Sample attributes:",
-    Array.from(allPaths).slice(0,3).map(p=> ({name:p.getAttribute("name"), id:p.getAttribute("id"), dataName:p.getAttribute("data-name")})));
-  console.log("India map: states matched from sheet data:", Object.keys(byState));
-
-  allPaths.forEach(path=>{
-    const stateName = getPathStateName(path);
-    const entries = byState[stateName] || [];
-    const count = entries.length;
-
-    if(count){
-      const intensity = 0.55 + 0.45 * (count / maxCount);
-      path.style.fill = `rgba(217,151,29, ${intensity})`; // gold-deep, scaled by count
-    } else {
-      path.style.fill = "rgba(255,255,255,0.05)";
-    }
-    path.style.stroke = "#FFFDF6";
-    path.style.strokeWidth = "0.6";
-    path.style.cursor = count ? "pointer" : "default";
-
-    if(count){
-      path.addEventListener("click", ()=> openStateModal(stateName, entries));
-      const titleEl = document.createElementNS("http://www.w3.org/2000/svg","title");
-      titleEl.textContent = `${stateName} — ${count}`;
-      path.appendChild(titleEl);
-
-      try{
-        const box = path.getBBox();
-        const cx = box.x + box.width/2;
-        const cy = box.y + box.height/2;
-        const circle = document.createElementNS("http://www.w3.org/2000/svg","circle");
-        circle.setAttribute("cx", cx); circle.setAttribute("cy", cy); circle.setAttribute("r", 9);
-        circle.setAttribute("fill", "#2B241F");
-        circle.setAttribute("stroke", "#FFFDF6");
-        circle.setAttribute("stroke-width", "1");
-        circle.style.pointerEvents = "none";
-        const label = document.createElementNS("http://www.w3.org/2000/svg","text");
-        label.setAttribute("x", cx); label.setAttribute("y", cy + 3.5);
-        label.setAttribute("text-anchor", "middle");
-        label.setAttribute("font-family", "IBM Plex Mono, monospace");
-        label.setAttribute("font-size", "9");
-        label.setAttribute("font-weight", "700");
-        label.setAttribute("fill", "#FFFDF6");
-        label.style.pointerEvents = "none";
-        label.textContent = count;
-        labelsGroup.appendChild(circle);
-        labelsGroup.appendChild(label);
-      }catch(e){ /* getBBox can fail on disconnected nodes — skip label if so */ }
-    }
-  });
-
-  svgEl.appendChild(labelsGroup);
 }
 
 function openStateModal(state, entries){
