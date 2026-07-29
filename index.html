@@ -1,6 +1,7 @@
 
 
 
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -1534,7 +1535,7 @@ function renderRosterTrend(){
   types.forEach((type, ti)=>{
     const color = ROSTER_PALETTE[ti % ROSTER_PALETTE.length];
     const yearMap = byTypeYear[type];
-    const pts = rosterYears.map((y,i)=> yearMap[y]!==undefined ? {i, v:yearMap[y]} : null);
+    const pts = rosterYears.map((y,i)=> yearMap[y]!==undefined ? {i, v:yearMap[y], year:y} : null);
 
     let d = "";
     let drawing = false;
@@ -1559,13 +1560,17 @@ function renderRosterTrend(){
       c.setAttribute("fill", color);
       c.setAttribute("stroke", "#FFFDF6");
       c.setAttribute("stroke-width","1.3");
+      c.style.cursor = "pointer";
+      c.addEventListener("click", ()=> openRosterPointModal(type, p.year, p.v));
       svg.appendChild(c);
 
       const lab = document.createElementNS(svgNS,"text");
       lab.setAttribute("class","node-label");
       lab.setAttribute("font-size","10");
       lab.setAttribute("x", x); lab.setAttribute("y", y - 11);
+      lab.style.cursor = "pointer";
       lab.textContent = p.v;
+      lab.addEventListener("click", ()=> openRosterPointModal(type, p.year, p.v));
       svg.appendChild(lab);
     });
 
@@ -1693,6 +1698,25 @@ function openPointModal(h, year, val){
 /* ============ MODAL ============ */
 
 const modalOverlay = document.getElementById("modalOverlay");
+function openRosterPointModal(type, year, count){
+  const entries = ROSTER.filter(r => r.type === type && r.batch === year);
+  const rows = entries.map(e=>{
+    const linkPart = e.link ? ` <a href="${e.link}" target="_blank" rel="noopener" style="color:var(--brown); text-decoration:underline;">story</a>` : "";
+    return `<div class="roster-row"><span class="r-name">${e.anchor}</span><span class="r-org">${e.org}${linkPart}</span></div>`;
+  }).join("");
+
+  openModal({
+    eyebrow: type + " · " + year,
+    title: count + " Changeloomers",
+    body: `
+      <div class="roster-head"><span>Anchors · ${year}</span><span>${type}</span></div>
+      <div class="roster-list">
+        ${rows || `<div class="pending-pill">No matching roster rows found</div>`}
+      </div>
+    `
+  });
+}
+
 function openModal({eyebrow, title, body}){
   document.getElementById("modalEyebrow").textContent = eyebrow;
   document.getElementById("modalTitle").textContent = title;
