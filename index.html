@@ -5,6 +5,7 @@
 
 
 
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -1667,6 +1668,30 @@ function resolveStateName(typed){
   return STATE_ALIAS_LOOKUP[norm] || null;
 }
 
+// Fallback lookup by short id/code, in case the map's <path> elements don't
+// carry a readable "name" attribute (different map libraries use different
+// conventions — some use full names, some use ISO-style 2-letter codes).
+const ID_TO_STATE = {
+  "jk":"Jammu and Kashmir","la":"Ladakh","hp":"Himachal Pradesh","ut":"Uttarakhand","uk":"Uttarakhand",
+  "pb":"Punjab","ar":"Arunachal Pradesh","hr":"Haryana","dl":"Delhi","up":"Uttar Pradesh","sk":"Sikkim",
+  "nl":"Nagaland","rj":"Rajasthan","br":"Bihar","as":"Assam","mn":"Manipur","gj":"Gujarat","mp":"Madhya Pradesh",
+  "jh":"Jharkhand","wb":"West Bengal","ml":"Meghalaya","mz":"Mizoram","mh":"Maharashtra","ct":"Chhattisgarh",
+  "cg":"Chhattisgarh","or":"Odisha","tr":"Tripura","ga":"Goa","tg":"Telangana","ts":"Telangana","ap":"Andhra Pradesh",
+  "ka":"Karnataka","tn":"Tamil Nadu","kl":"Kerala","py":"Puducherry","an":"Andaman and Nicobar Islands",
+  "ch":"Chandigarh","dn":"Dadra and Nagar Haveli","dd":"Daman and Diu","ld":"Lakshadweep"
+};
+
+// Reads the state name off a <path> regardless of which attribute the
+// underlying map library actually used (name, data-name, or a short id code).
+function getPathStateName(path){
+  const byName = path.getAttribute("name");
+  if(byName) return byName;
+  const byDataName = path.getAttribute("data-name");
+  if(byDataName) return byDataName;
+  const id = (path.getAttribute("id") || "").toLowerCase().replace(/^in-/, "");
+  return ID_TO_STATE[id] || null;
+}
+
 // Best-effort: finds every state this location text refers to. Checks for
 // an explicit state name first; if none is written, falls back to
 // recognising city names via CITY_TO_STATE. Handles messy real-world text
@@ -1730,8 +1755,13 @@ async function renderIndiaMap(){
   const maxCount = Math.max(1, ...Object.values(byState).map(a=> a.length));
   const labelsGroup = document.createElementNS("http://www.w3.org/2000/svg","g");
 
-  svgEl.querySelectorAll("path").forEach(path=>{
-    const stateName = path.getAttribute("name");
+  const allPaths = svgEl.querySelectorAll("path");
+  console.log("India map: found " + allPaths.length + " <path> elements. Sample attributes:",
+    Array.from(allPaths).slice(0,3).map(p=> ({name:p.getAttribute("name"), id:p.getAttribute("id"), dataName:p.getAttribute("data-name")})));
+  console.log("India map: states matched from sheet data:", Object.keys(byState));
+
+  allPaths.forEach(path=>{
+    const stateName = getPathStateName(path);
     const entries = byState[stateName] || [];
     const count = entries.length;
 
