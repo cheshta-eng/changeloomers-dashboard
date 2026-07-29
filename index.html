@@ -2,6 +2,7 @@
 
 
 
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -700,6 +701,18 @@
         </div>
       </div>
     </section>
+
+    <section id="indiaMap">
+      <h2>Changeloomers roster · by state</h2>
+      <p class="section-sub">Built from the "Location / Address" column in the "CL DATA CHESHTA" tab, plotted on a real India state-boundary map. Click a state to see the organisations and anchors there.</p>
+      <div class="chart-shell">
+        <div id="indiaMapWrap" style="max-width:520px; margin:0 auto;"></div>
+        <div class="chart-caption">
+          <span>Map data: svg-maps/india (CC BY 4.0)</span>
+        </div>
+      </div>
+    </section>
+
   </main>
 </div>
 
@@ -924,7 +937,7 @@ function applySheetData(data){
         org: String(r["Name of Organisation"]||"").trim(),
         type: String(r["Type"]||"").trim(),
         batch: String(r["Changelooms Batch"]||"").trim(),
-        link: String(r["Link to Story and Picture"]||"").trim()
+        location: String(r["Location / Address"]||"").trim()
       }));
   }
 }
@@ -1583,8 +1596,146 @@ function renderRosterTrend(){
   });
 }
 
+/* ============ INDIA STATE MAP (real state-boundary SVG, loaded live from a CDN) ============ */
+
+// city (lowercase) -> state, used as a fallback when the sheet's
+// location text doesn't literally contain the state name.
+const CITY_TO_STATE = {
+  "delhi":"Delhi","new delhi":"Delhi","delh":"Delhi",
+  "khandwa":"Madhya Pradesh","bhopal":"Madhya Pradesh","indore":"Madhya Pradesh","harda":"Madhya Pradesh",
+  "betul":"Madhya Pradesh","chhindwara":"Madhya Pradesh","jabalpur":"Madhya Pradesh","gwalior":"Madhya Pradesh",
+  "bareilly":"Uttar Pradesh","breliy":"Uttar Pradesh","lucknow":"Uttar Pradesh","kanpur":"Uttar Pradesh",
+  "varanasi":"Uttar Pradesh","agra":"Uttar Pradesh","noida":"Uttar Pradesh","ghaziabad":"Uttar Pradesh",
+  "allahabad":"Uttar Pradesh","prayagraj":"Uttar Pradesh",
+  "kodarma":"Jharkhand","ranchi":"Jharkhand","garhwa":"Jharkhand","garwah":"Jharkhand","singhbhum":"Jharkhand",
+  "jamshedpur":"Jharkhand","dhanbad":"Jharkhand","jhanrkhand":"Jharkhand",
+  "patna":"Bihar","nalanda":"Bihar","rohtas":"Bihar","west champaran":"Bihar","gaya":"Bihar",
+  "muzaffarpur":"Bihar","bhagalpur":"Bihar","darbhanga":"Bihar","purnia":"Bihar",
+  "mumbai":"Maharashtra","pune":"Maharashtra","nagpur":"Maharashtra","nashik":"Maharashtra",
+  "aurangabad":"Maharashtra","thane":"Maharashtra",
+  "bengaluru":"Karnataka","bangalore":"Karnataka","mysuru":"Karnataka","mysore":"Karnataka","hubli":"Karnataka",
+  "chennai":"Tamil Nadu","coimbatore":"Tamil Nadu","madurai":"Tamil Nadu","trichy":"Tamil Nadu",
+  "hyderabad":"Telangana","warangal":"Telangana",
+  "kolkata":"West Bengal","howrah":"West Bengal","siliguri":"West Bengal","darjeeling":"West Bengal",
+  "ahmedabad":"Gujarat","surat":"Gujarat","vadodara":"Gujarat","rajkot":"Gujarat",
+  "jaipur":"Rajasthan","jodhpur":"Rajasthan","udaipur":"Rajasthan","kota":"Rajasthan","ajmer":"Rajasthan",
+  "ludhiana":"Punjab","amritsar":"Punjab","jalandhar":"Punjab",
+  "shimla":"Himachal Pradesh","dehradun":"Uttarakhand","haridwar":"Uttarakhand","rishikesh":"Uttarakhand",
+  "bhubaneswar":"Odisha","cuttack":"Odisha",
+  "raipur":"Chhattisgarh","bilaspur":"Chhattisgarh",
+  "guwahati":"Assam","dibrugarh":"Assam",
+  "imphal":"Manipur","shillong":"Meghalaya","aizawl":"Mizoram","kohima":"Nagaland",
+  "agartala":"Tripura","itanagar":"Arunachal Pradesh","gangtok":"Sikkim",
+  "thiruvananthapuram":"Kerala","kochi":"Kerala","kozhikode":"Kerala",
+  "visakhapatnam":"Andhra Pradesh","vijayawada":"Andhra Pradesh","tirupati":"Andhra Pradesh",
+  "panaji":"Goa","gurgaon":"Haryana","gurugram":"Haryana","faridabad":"Haryana","panipat":"Haryana",
+  "srinagar":"Jammu and Kashmir","jammu":"Jammu and Kashmir","leh":"Ladakh",
+  "puducherry":"Puducherry","pondicherry":"Puducherry"
+};
+
+const STATE_NAMES = [
+  "Jammu and Kashmir","Ladakh","Himachal Pradesh","Uttarakhand","Punjab","Arunachal Pradesh",
+  "Haryana","Delhi","Uttar Pradesh","Sikkim","Nagaland","Rajasthan","Bihar","Assam","Manipur",
+  "Gujarat","Madhya Pradesh","Jharkhand","West Bengal","Meghalaya","Mizoram","Maharashtra",
+  "Chhattisgarh","Odisha","Tripura","Goa","Telangana","Andhra Pradesh","Karnataka","Tamil Nadu",
+  "Kerala","Puducherry","Andaman and Nicobar Islands","Chandigarh","Dadra and Nagar Haveli",
+  "Daman and Diu","Lakshadweep"
+];
+
+// Best-effort: finds every state this location text refers to. Checks for
+// an explicit state name first; if none is written, falls back to
+// recognising city names via CITY_TO_STATE. Handles messy real-world text
+// like "Betul and Chhindwara," or "Patna ,Bihar" by splitting on comma,
+// "and", "&", or "/".
+function extractStatesFromLocation(str){
+  if(!str) return [];
+  const found = new Set();
+  STATE_NAMES.forEach(s=>{
+    const escaped = s.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+    const re = new RegExp("\\b" + escaped + "\\b", "i");
+    if(re.test(str)) found.add(s);
+  });
+  if(found.size) return Array.from(found);
+
+  const tokens = str.split(/,| and |&|\//i).map(t=> t.trim().toLowerCase()).filter(Boolean);
+  tokens.forEach(t=>{
+    if(CITY_TO_STATE[t]) found.add(CITY_TO_STATE[t]);
+  });
+  return Array.from(found);
+}
+
+let INDIA_SVG_TEXT = null; // cached after first successful fetch
+
+async function renderIndiaMap(){
+  const wrap = document.getElementById("indiaMapWrap");
+  if(!wrap) return;
+
+  if(!ROSTER.length){
+    wrap.innerHTML = `<div class="pending-pill">No roster data yet — check the "CL DATA CHESHTA" tab.</div>`;
+    return;
+  }
+
+  if(!INDIA_SVG_TEXT){
+    try{
+      const res = await fetch("https://cdn.jsdelivr.net/npm/@svg-maps/india@2.0.0/india.svg");
+      if(!res.ok) throw new Error("bad response: " + res.status);
+      INDIA_SVG_TEXT = await res.text();
+    }catch(err){
+      wrap.innerHTML = `<div class="pending-pill">Map couldn't load right now — try refreshing the page.</div>`;
+      console.warn("India map SVG failed to load:", err);
+      return;
+    }
+  }
+
+  wrap.innerHTML = INDIA_SVG_TEXT;
+  const svgEl = wrap.querySelector("svg");
+  if(!svgEl) return;
+  svgEl.style.width = "100%";
+  svgEl.style.height = "auto";
+  svgEl.style.display = "block";
+
+  const byState = {};
+  ROSTER.forEach(r=>{
+    if(!r.location) return;
+    extractStatesFromLocation(r.location).forEach(s=>{
+      if(!byState[s]) byState[s] = [];
+      byState[s].push(r);
+    });
+  });
+  const maxCount = Math.max(1, ...Object.values(byState).map(a=> a.length));
+
+  svgEl.querySelectorAll("path").forEach(path=>{
+    const stateName = path.getAttribute("name");
+    const entries = byState[stateName] || [];
+    const count = entries.length;
+    const intensity = count ? 0.25 + 0.7 * (count / maxCount) : 0.07;
+    path.style.fill = `rgba(139,94,60, ${intensity})`;
+    path.style.stroke = "#FFFDF6";
+    path.style.strokeWidth = "0.6";
+    path.style.cursor = count ? "pointer" : "default";
+    if(count){
+      path.addEventListener("click", ()=> openStateModal(stateName, entries));
+      const titleEl = document.createElementNS("http://www.w3.org/2000/svg","title");
+      titleEl.textContent = `${stateName} — ${count}`;
+      path.appendChild(titleEl);
+    }
+  });
+}
+
+function openStateModal(state, entries){
+  const rows = entries.map(e=>{
+    const cityPart = e.location ? ` <span style="color:var(--ink-soft); font-size:11.5px;">(${e.location})</span>` : "";
+    return `<div class="roster-row"><span class="r-name">${e.anchor}</span><span class="r-org">${e.org || "N/A"}${cityPart}</span></div>`;
+  }).join("");
+  openModal({
+    eyebrow: "State",
+    title: state + " · " + entries.length + " Changeloomers",
+    body: `<div class="roster-list">${rows}</div>`
+  });
+}
+
 async function render(){
-  const steps = [renderLegend, renderStats, renderFunders, renderNomCards, renderHubOrgs, renderRoster, renderRosterTrend, renderNomBubbles, renderFunderBubbles, buildChart];
+  const steps = [renderLegend, renderStats, renderFunders, renderNomCards, renderHubOrgs, renderRoster, renderRosterTrend, renderIndiaMap, renderNomBubbles, renderFunderBubbles, buildChart];
   steps.forEach(step=>{
     try{ step(); }
     catch(err){ console.error(`${step.name}() failed — skipping so the rest of the page still renders:`, err); }
@@ -1701,8 +1852,7 @@ const modalOverlay = document.getElementById("modalOverlay");
 function openRosterPointModal(type, year, count){
   const entries = ROSTER.filter(r => r.type === type && r.batch === year);
   const rows = entries.map(e=>{
-    const linkPart = e.link ? ` <a href="${e.link}" target="_blank" rel="noopener" style="color:var(--brown); text-decoration:underline;">story</a>` : "";
-    return `<div class="roster-row"><span class="r-name">${e.anchor}</span><span class="r-org">${e.org}${linkPart}</span></div>`;
+    return `<div class="roster-row"><span class="r-name">${e.anchor}</span><span class="r-org">${e.org || "N/A"}</span></div>`;
   }).join("");
 
   openModal({
