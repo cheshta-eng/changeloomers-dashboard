@@ -3,6 +3,7 @@
 
 
 
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -1703,23 +1704,55 @@ async function renderIndiaMap(){
     });
   });
   const maxCount = Math.max(1, ...Object.values(byState).map(a=> a.length));
+  const labelsGroup = document.createElementNS("http://www.w3.org/2000/svg","g");
 
   svgEl.querySelectorAll("path").forEach(path=>{
     const stateName = path.getAttribute("name");
     const entries = byState[stateName] || [];
     const count = entries.length;
-    const intensity = count ? 0.25 + 0.7 * (count / maxCount) : 0.07;
-    path.style.fill = `rgba(139,94,60, ${intensity})`;
+
+    if(count){
+      const intensity = 0.55 + 0.45 * (count / maxCount);
+      path.style.fill = `rgba(217,151,29, ${intensity})`; // gold-deep, scaled by count
+    } else {
+      path.style.fill = "rgba(255,255,255,0.05)";
+    }
     path.style.stroke = "#FFFDF6";
     path.style.strokeWidth = "0.6";
     path.style.cursor = count ? "pointer" : "default";
+
     if(count){
       path.addEventListener("click", ()=> openStateModal(stateName, entries));
       const titleEl = document.createElementNS("http://www.w3.org/2000/svg","title");
       titleEl.textContent = `${stateName} — ${count}`;
       path.appendChild(titleEl);
+
+      try{
+        const box = path.getBBox();
+        const cx = box.x + box.width/2;
+        const cy = box.y + box.height/2;
+        const circle = document.createElementNS("http://www.w3.org/2000/svg","circle");
+        circle.setAttribute("cx", cx); circle.setAttribute("cy", cy); circle.setAttribute("r", 9);
+        circle.setAttribute("fill", "#2B241F");
+        circle.setAttribute("stroke", "#FFFDF6");
+        circle.setAttribute("stroke-width", "1");
+        circle.style.pointerEvents = "none";
+        const label = document.createElementNS("http://www.w3.org/2000/svg","text");
+        label.setAttribute("x", cx); label.setAttribute("y", cy + 3.5);
+        label.setAttribute("text-anchor", "middle");
+        label.setAttribute("font-family", "IBM Plex Mono, monospace");
+        label.setAttribute("font-size", "9");
+        label.setAttribute("font-weight", "700");
+        label.setAttribute("fill", "#FFFDF6");
+        label.style.pointerEvents = "none";
+        label.textContent = count;
+        labelsGroup.appendChild(circle);
+        labelsGroup.appendChild(label);
+      }catch(e){ /* getBBox can fail on disconnected nodes — skip label if so */ }
     }
   });
+
+  svgEl.appendChild(labelsGroup);
 }
 
 function openStateModal(state, entries){
