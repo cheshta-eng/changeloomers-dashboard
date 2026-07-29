@@ -7,6 +7,7 @@
 
 
 
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -214,7 +215,8 @@
 
   /* ---------- CHART ---------- */
   .chart-shell{
-    background:var(--dark-bg);
+    background:var(--khadi);
+    border:1px solid var(--hairline);
     border-radius:20px;
     padding:24px 24px 16px;
     position:relative;
@@ -225,14 +227,14 @@
   .chart-shell::before{
     content:"";
     position:absolute; inset:0;
-    background-image:repeating-linear-gradient(0deg, rgba(255,255,255,0.03) 0 1px, transparent 1px 34px);
+    background-image:repeating-linear-gradient(0deg, rgba(61,54,47,0.035) 0 1px, transparent 1px 34px);
     pointer-events:none;
   }
   .chart-caption{
     display:flex;
     justify-content:space-between;
     align-items:center;
-    color:rgba(255,255,255,0.5);
+    color:var(--ink-soft);
     font-size:12px;
     font-family:'IBM Plex Mono', monospace;
     margin-top:10px;
@@ -245,7 +247,7 @@
   .bubble-cluster{
     margin-top:18px;
     padding-top:16px;
-    border-top:1px solid rgba(255,255,255,0.09);
+    border-top:1px solid var(--hairline);
     display:flex;
     gap:20px;
     align-items:stretch;
@@ -264,7 +266,7 @@
     font-size:10px;
     text-transform:uppercase;
     letter-spacing:0.06em;
-    color:rgba(255,255,255,0.45);
+    color:var(--ink-soft);
     margin-bottom:8px;
   }
   .bubble-row{
@@ -295,17 +297,17 @@
     color:#2B241F;
   }
   .bubble.dim{opacity:0.18;}
-  .bubble.active-ring{box-shadow:0 0 0 3px rgba(255,255,255,0.55);}
+  .bubble.active-ring{box-shadow:0 0 0 3px rgba(61,54,47,0.4);}
 
   /* persistent detail panel — replaces the modal for bubble clicks */
   .detail-panel{
     flex:1 1 44%;
     min-width:0;
-    background:rgba(255,255,255,0.045);
-    border:1px solid rgba(255,255,255,0.09);
+    background:rgba(61,54,47,0.03);
+    border:1px solid var(--hairline);
     border-radius:12px;
     padding:14px 16px;
-    color:rgba(255,255,255,0.9);
+    color:var(--ink);
     font-size:12.5px;
     line-height:1.5;
     max-height:210px;
@@ -316,7 +318,7 @@
     font-size:10px;
     text-transform:uppercase;
     letter-spacing:0.08em;
-    color:var(--gold);
+    color:var(--brown);
     margin-bottom:4px;
     display:flex;
     justify-content:space-between;
@@ -325,27 +327,27 @@
   .detail-panel .d-clear{
     text-transform:none;
     letter-spacing:0;
-    color:rgba(255,255,255,0.4);
+    color:var(--ink-soft);
     cursor:pointer;
     font-size:10.5px;
   }
-  .detail-panel .d-clear:hover{color:rgba(255,255,255,0.8);}
+  .detail-panel .d-clear:hover{color:var(--ink);}
   .detail-panel h4{
     font-family:'Fraunces', serif;
     font-size:16px;
-    color:#FFFDF6;
+    color:var(--teal-deep);
     margin:0 0 6px;
   }
-  .detail-panel p{margin:0 0 8px; color:rgba(255,255,255,0.75);}
+  .detail-panel p{margin:0 0 8px; color:var(--ink-soft);}
   .detail-panel .d-row{
     display:flex; justify-content:space-between;
     padding:4px 0;
-    border-bottom:1px solid rgba(255,255,255,0.08);
+    border-bottom:1px solid var(--hairline);
     font-size:12px;
   }
   .detail-panel .d-row:last-child{border-bottom:none;}
   .detail-placeholder{
-    color:rgba(255,255,255,0.4);
+    color:var(--ink-soft);
     font-style:italic;
     display:flex;
     align-items:center;
@@ -368,24 +370,22 @@
     gap:7px;
     padding:6px 13px 6px 9px;
     border-radius:999px;
-    background:rgba(255,255,255,0.06);
+    background:rgba(61,54,47,0.05);
     cursor:pointer;
     transition:background .15s ease, opacity .2s ease;
     font-size:12.5px;
-    color:rgba(255,255,255,0.88);
+    color:var(--ink);
     font-family:'IBM Plex Sans', sans-serif;
     font-weight:500;
-    border:1px solid rgba(255,255,255,0.08);
+    border:1px solid var(--hairline);
   }
-  .legend-chip:hover{background:rgba(255,255,255,0.13);}
+  .legend-chip:hover{background:rgba(61,54,47,0.1);}
   .legend-chip.dim{opacity:0.28;}
   .legend-dot{width:10px; height:10px; border-radius:50%; flex:0 0 auto;}
   .legend-chip .lc-pending{
     font-size:9.5px;
     font-family:'IBM Plex Mono', monospace;
-    color:rgba(255,255,255,0.4);
-  }
-  .legend-reset{
+    color:var(--ink-soft);
     font-family:'IBM Plex Mono', monospace;
     font-size:11.5px;
     color:var(--gold-deep);
@@ -409,27 +409,27 @@
     font-family:'IBM Plex Mono', monospace;
     font-weight:600;
     text-anchor:middle;
-    fill:rgba(255,255,255,0.92);
+    fill:var(--ink);
   }
   .axis-year{
     font-family:'IBM Plex Mono', monospace;
-    fill:rgba(255,255,255,0.5);
+    fill:var(--ink-soft);
     text-anchor:end;
   }
-  .milestone-line{stroke:rgba(255,255,255,0.25); stroke-dasharray:3 4;}
+  .milestone-line{stroke:rgba(61,54,47,0.3); stroke-dasharray:3 4;}
   .milestone-label{
     font-family:'IBM Plex Sans', sans-serif;
-    fill:rgba(255,255,255,0.85);
+    fill:var(--ink);
   }
-  .future-band{fill:rgba(255,255,255,0.035);}
+  .future-band{fill:rgba(61,54,47,0.045);}
   .future-tag{
     font-family:'IBM Plex Mono', monospace;
-    fill:rgba(255,255,255,0.4);
+    fill:var(--ink-soft);
     text-anchor:middle;
   }
   .funder-flag{cursor:pointer; transition:opacity .2s ease;}
   .funder-flag.dim{opacity:0.15;}
-  .funder-flag circle{fill:var(--gold-deep); stroke:var(--dark-bg); stroke-width:1;}
+  .funder-flag circle{fill:var(--gold-deep); stroke:var(--khadi); stroke-width:1;}
   .funder-flag:hover circle{fill:#EFC157;}
 
   /* ---------- FUNDERS ---------- */
@@ -1316,14 +1316,14 @@ function buildChart(){
     const gl = document.createElementNS(svgNS,"line");
     gl.setAttribute("x1", PAD_L); gl.setAttribute("x2", VB_W-PAD_R);
     gl.setAttribute("y1", yFor(g)); gl.setAttribute("y2", yFor(g));
-    gl.setAttribute("stroke","rgba(255,255,255,0.08)");
+    gl.setAttribute("stroke","rgba(61,54,47,0.12)");
     chartSvg.appendChild(gl);
     const gt = document.createElementNS(svgNS,"text");
     gt.setAttribute("x", PAD_L - 10); gt.setAttribute("y", yFor(g)+4);
     gt.setAttribute("text-anchor","end");
     gt.setAttribute("font-family","IBM Plex Mono, monospace");
     gt.setAttribute("font-size","11");
-    gt.setAttribute("fill","rgba(255,255,255,0.4)");
+    gt.setAttribute("fill","#6B6255");
     gt.textContent = g;
     chartSvg.appendChild(gt);
   }
@@ -1415,7 +1415,7 @@ function buildChart(){
       c.setAttribute("class","node");
       c.setAttribute("cx", x); c.setAttribute("cy", y); c.setAttribute("r", 6);
       c.setAttribute("fill", h.color);
-      c.setAttribute("stroke", "#FFFDF6");
+      c.setAttribute("stroke", "#F7F3E4");
       c.setAttribute("stroke-width","1.5");
       c.dataset.nom = h.id;
       c.addEventListener("click", ()=> openPointModal(h, YEARS[p.i], p.v));
@@ -1469,10 +1469,10 @@ function renderRoster(){
       const barW = (count / max) * barMaxW;
       const color = ROSTER_PALETTE[i % ROSTER_PALETTE.length];
       svg += `
-        <text x="0" y="${y + rowH/2 + 4}" font-family="IBM Plex Mono, monospace" font-size="11.5" fill="rgba(255,255,255,0.6)">${label}</text>
-        <rect x="${labelW}" y="${y + 6}" width="${barMaxW}" height="14" rx="7" fill="rgba(255,255,255,0.08)"></rect>
+        <text x="0" y="${y + rowH/2 + 4}" font-family="IBM Plex Mono, monospace" font-size="11.5" fill="#514740">${label}</text>
+        <rect x="${labelW}" y="${y + 6}" width="${barMaxW}" height="14" rx="7" fill="rgba(61,54,47,0.08)"></rect>
         <rect x="${labelW}" y="${y + 6}" width="${Math.max(barW,5)}" height="14" rx="7" fill="${color}"></rect>
-        <text x="${labelW + barMaxW + 8}" y="${y + rowH/2 + 4}" font-family="IBM Plex Mono, monospace" font-size="12" font-weight="600" fill="#FFFDF6">${count}</text>
+        <text x="${labelW + barMaxW + 8}" y="${y + rowH/2 + 4}" font-family="IBM Plex Mono, monospace" font-size="12" font-weight="600" fill="#3D362F">${count}</text>
       `;
     });
     svg += `</svg>`;
@@ -1527,14 +1527,14 @@ function renderRosterTrend(){
     const gl = document.createElementNS(svgNS,"line");
     gl.setAttribute("x1", PAD_L); gl.setAttribute("x2", VB_W-PAD_R);
     gl.setAttribute("y1", rYFor(g)); gl.setAttribute("y2", rYFor(g));
-    gl.setAttribute("stroke","rgba(255,255,255,0.08)");
+    gl.setAttribute("stroke","rgba(61,54,47,0.12)");
     svg.appendChild(gl);
     const gt = document.createElementNS(svgNS,"text");
     gt.setAttribute("x", PAD_L - 10); gt.setAttribute("y", rYFor(g)+4);
     gt.setAttribute("text-anchor","end");
     gt.setAttribute("font-family","IBM Plex Mono, monospace");
     gt.setAttribute("font-size","11");
-    gt.setAttribute("fill","rgba(255,255,255,0.4)");
+    gt.setAttribute("fill","#6B6255");
     gt.textContent = g;
     svg.appendChild(gt);
   }
@@ -1576,7 +1576,7 @@ function renderRosterTrend(){
       const c = document.createElementNS(svgNS,"circle");
       c.setAttribute("cx", x); c.setAttribute("cy", y); c.setAttribute("r", 5.5);
       c.setAttribute("fill", color);
-      c.setAttribute("stroke", "#FFFDF6");
+      c.setAttribute("stroke", "#F7F3E4");
       c.setAttribute("stroke-width","1.3");
       c.style.cursor = "pointer";
       c.addEventListener("click", ()=> openRosterPointModal(type, p.year, p.v));
@@ -1726,7 +1726,7 @@ async function renderIndiaMap(){
   if(!diag){
     diag = document.createElement("div");
     diag.id = "indiaMapDiag";
-    diag.style.cssText = "margin-top:10px; font-family:'IBM Plex Mono', monospace; font-size:11px; color:rgba(255,255,255,0.55); line-height:1.6;";
+    diag.style.cssText = "margin-top:10px; font-family:'IBM Plex Mono', monospace; font-size:11px; color:#6B6255; line-height:1.6;";
     wrap.parentNode.insertBefore(diag, wrap.nextSibling);
   }
 
@@ -1781,9 +1781,9 @@ async function renderIndiaMap(){
         const intensity = 0.55 + 0.45 * (count / maxCount);
         path.style.fill = `rgba(217,151,29, ${intensity})`;
       } else {
-        path.style.fill = "rgba(255,255,255,0.05)";
+        path.style.fill = "rgba(61,54,47,0.06)";
       }
-      path.style.stroke = "#FFFDF6";
+      path.style.stroke = "#F7F3E4";
       path.style.strokeWidth = "0.6";
       path.style.cursor = count ? "pointer" : "default";
 
