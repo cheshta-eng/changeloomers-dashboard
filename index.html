@@ -4,6 +4,7 @@
 
 
 
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -938,7 +939,8 @@ function applySheetData(data){
         org: String(r["Name of Organisation"]||"").trim(),
         type: String(r["Type"]||"").trim(),
         batch: String(r["Changelooms Batch"]||"").trim(),
-        location: String(r["Location / Address"]||"").trim()
+        location: String(r["Location / Address"]||"").trim(),
+        state: String(r["State"]||"").trim()
       }));
   }
 }
@@ -1643,6 +1645,28 @@ const STATE_NAMES = [
   "Daman and Diu","Lakshadweep"
 ];
 
+// Normalizes any variant of a typed state name ("Orissa", "Uttaranchal",
+// "J&K", extra spaces, different casing) to the exact name used by the
+// map's <path name="..."> attributes.
+function normalizeStateText(str){
+  return String(str||"").trim().toLowerCase().replace(/&/g, "and").replace(/\s+/g, " ");
+}
+
+const STATE_ALIAS_LOOKUP = {};
+STATE_NAMES.forEach(s=> STATE_ALIAS_LOOKUP[normalizeStateText(s)] = s);
+// common old/alternate names people naturally still use
+STATE_ALIAS_LOOKUP[normalizeStateText("Orissa")] = "Odisha";
+STATE_ALIAS_LOOKUP[normalizeStateText("Uttaranchal")] = "Uttarakhand";
+STATE_ALIAS_LOOKUP[normalizeStateText("Pondicherry")] = "Puducherry";
+STATE_ALIAS_LOOKUP[normalizeStateText("J&K")] = "Jammu and Kashmir";
+STATE_ALIAS_LOOKUP[normalizeStateText("NCT of Delhi")] = "Delhi";
+STATE_ALIAS_LOOKUP[normalizeStateText("New Delhi")] = "Delhi";
+
+function resolveStateName(typed){
+  const norm = normalizeStateText(typed);
+  return STATE_ALIAS_LOOKUP[norm] || null;
+}
+
 // Best-effort: finds every state this location text refers to. Checks for
 // an explicit state name first; if none is written, falls back to
 // recognising city names via CITY_TO_STATE. Handles messy real-world text
@@ -1697,11 +1721,11 @@ async function renderIndiaMap(){
 
   const byState = {};
   ROSTER.forEach(r=>{
-    if(!r.location) return;
-    extractStatesFromLocation(r.location).forEach(s=>{
-      if(!byState[s]) byState[s] = [];
-      byState[s].push(r);
-    });
+    if(!r.state) return;
+    const official = resolveStateName(r.state);
+    if(!official) return; // unrecognised state name — silently skipped, fix spelling in the sheet to include it
+    if(!byState[official]) byState[official] = [];
+    byState[official].push(r);
   });
   const maxCount = Math.max(1, ...Object.values(byState).map(a=> a.length));
   const labelsGroup = document.createElementNS("http://www.w3.org/2000/svg","g");
@@ -1757,8 +1781,9 @@ async function renderIndiaMap(){
 
 function openStateModal(state, entries){
   const rows = entries.map(e=>{
+    const typePart = e.type ? ` <span style="color:var(--brown); font-size:11px; font-family:'IBM Plex Mono', monospace;">${e.type}</span>` : "";
     const cityPart = e.location ? ` <span style="color:var(--ink-soft); font-size:11.5px;">(${e.location})</span>` : "";
-    return `<div class="roster-row"><span class="r-name">${e.anchor}</span><span class="r-org">${e.org || "N/A"}${cityPart}</span></div>`;
+    return `<div class="roster-row"><span class="r-name">${e.anchor}</span><span class="r-org">${e.org || "N/A"}${typePart}${cityPart}</span></div>`;
   }).join("");
   openModal({
     eyebrow: "State",
