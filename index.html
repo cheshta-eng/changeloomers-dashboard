@@ -9,6 +9,7 @@
 
 
 
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -711,9 +712,9 @@
       <h2>Changeloomers roster · by state</h2>
       <p class="section-sub">Built from the "Location / Address" column in the "CL DATA CHESHTA" tab, plotted on a real India state-boundary map. Click a state to see the organisations and anchors there.</p>
       <div class="chart-shell">
-        <div style="display:flex; gap:24px; align-items:flex-start; flex-wrap:wrap;">
-          <div id="indiaMapWrap" style="flex:1 1 480px; min-width:280px;"></div>
-          <div id="indiaMapStats" style="flex:0 1 240px; min-width:200px; background:var(--khadi-deep); border:1px solid var(--hairline); border-radius:12px; padding:16px 18px;"></div>
+        <div style="position:relative;">
+          <div id="indiaMapWrap" style="max-width:560px; margin:0 auto;"></div>
+          <div id="indiaMapStats" style="position:absolute; top:6px; right:6px; background:var(--khadi-deep); border:1px solid var(--hairline); border-radius:12px; padding:14px 16px; min-width:190px;"></div>
         </div>
         <div class="chart-caption">
           <span>Map data: svg-maps/india (CC BY 4.0)</span>
@@ -836,7 +837,8 @@ let FUNDERS = [
 ];
 
 let MILESTONES = [
-  {year:"2012-13", endYear:"2013-14", label:"CL + LLJ merge into CL-LLJ"}
+  {year:"2012", label:"CL + LLJ merge into CL-LLJ"},
+  {year:"2015", label:"Hubs strategy begins"}
 ];
 
 // HUBS = member organisations that implement the journey on the ground.
@@ -909,10 +911,9 @@ function applySheetData(data){
 
   if(data.milestones){
     MILESTONES = data.milestones
-      .filter(r => r.Year && r.EndYear && r.Label)
+      .filter(r => r.Year && r.Label)
       .map(r => ({
         year: String(r.Year).trim(),
-        endYear: String(r.EndYear || r.Year).trim(),
         label: String(r.Label).trim()
       })); // can legitimately be empty
   }
@@ -1287,6 +1288,16 @@ function yFor(v){ return PAD_T + plotH - (v / yMax) * plotH; }
 chartSvg.setAttribute("viewBox", `0 0 ${VB_W} ${VB_H}`);
 chartSvg.setAttribute("preserveAspectRatio","xMidYMid meet");
 
+// Finds the index of a milestone's year within a chart's own year list,
+// matching either exactly ("2015") or as a prefix of a range-style label
+// ("2012" matches "2012-13"). Lets one Milestones-tab row apply cleanly
+// to both charts even though they use different year label formats.
+function findYearIndex(yearsArr, milestoneYear){
+  let idx = yearsArr.indexOf(milestoneYear);
+  if(idx >= 0) return idx;
+  return yearsArr.findIndex(y=> y.startsWith(milestoneYear));
+}
+
 function yearFunders(year){
   return FUNDERS.filter(f=> f.years.includes(year)).map(f=>f.name);
 }
@@ -1344,22 +1355,21 @@ function buildChart(){
     chartSvg.appendChild(t);
   });
 
-  // milestone markers (e.g. CL + LLJ merger)
+  // milestone markers (single-year, e.g. CL + LLJ merger)
   MILESTONES.forEach(m=>{
-    const i1 = YEARS.indexOf(m.year), i2 = YEARS.indexOf(m.endYear);
-    [i1,i2].forEach(i=>{
-      if(i<0) return;
-      const ml = document.createElementNS(svgNS,"line");
-      ml.setAttribute("class","milestone-line");
-      ml.setAttribute("x1", xFor(i)); ml.setAttribute("x2", xFor(i));
-      ml.setAttribute("y1", PAD_T); ml.setAttribute("y2", VB_H-PAD_B);
-      chartSvg.appendChild(ml);
-    });
-    const midX = (xFor(i1) + xFor(i2))/2;
+    const idx = findYearIndex(YEARS, m.year);
+    if(idx < 0) return;
+    const x = xFor(idx);
+    const ml = document.createElementNS(svgNS,"line");
+    ml.setAttribute("class","milestone-line");
+    ml.setAttribute("x1", x); ml.setAttribute("x2", x);
+    ml.setAttribute("y1", PAD_T); ml.setAttribute("y2", VB_H-PAD_B);
+    chartSvg.appendChild(ml);
+
     const lbl = document.createElementNS(svgNS,"text");
     lbl.setAttribute("class","milestone-label");
     lbl.setAttribute("font-size","11.5");
-    lbl.setAttribute("x", midX);
+    lbl.setAttribute("x", x);
     lbl.setAttribute("y", PAD_T - 16);
     lbl.setAttribute("text-anchor","middle");
     lbl.textContent = m.label;
@@ -1552,6 +1562,26 @@ function renderRosterTrend(){
     t.setAttribute("transform", `rotate(-52 ${rXFor(i)} ${VB_H - PAD_B + 20})`);
     t.textContent = y;
     svg.appendChild(t);
+  });
+
+  MILESTONES.forEach(m=>{
+    const idx = findYearIndex(rosterYears, m.year);
+    if(idx < 0) return;
+    const x = rXFor(idx);
+    const ml = document.createElementNS(svgNS,"line");
+    ml.setAttribute("class","milestone-line");
+    ml.setAttribute("x1", x); ml.setAttribute("x2", x);
+    ml.setAttribute("y1", PAD_T); ml.setAttribute("y2", VB_H-PAD_B);
+    svg.appendChild(ml);
+
+    const lbl = document.createElementNS(svgNS,"text");
+    lbl.setAttribute("class","milestone-label");
+    lbl.setAttribute("font-size","11.5");
+    lbl.setAttribute("x", x);
+    lbl.setAttribute("y", PAD_T - 16);
+    lbl.setAttribute("text-anchor","middle");
+    lbl.textContent = m.label;
+    svg.appendChild(lbl);
   });
 
   types.forEach((type, ti)=>{
@@ -1774,10 +1804,9 @@ async function renderIndiaMap(){
     const statsEl = document.getElementById("indiaMapStats");
     if(statsEl){
       statsEl.innerHTML = `
-        <div class="bubble-label">At a glance</div>
-        <div class="d-row"><span>Total on file</span><span style="font-weight:600;">${totalOnFile}</span></div>
-        <div class="d-row"><span>Location on record</span><span style="font-weight:600;">${withLocation}</span></div>
-        <div class="d-row"><span>Location pending</span><span style="font-weight:600;">${pending}</span></div>
+        <div class="d-row"><span>Total CLers</span><span style="font-weight:600;">${totalOnFile}</span></div>
+        <div class="d-row"><span>Location on Record</span><span style="font-weight:600;">${withLocation}</span></div>
+        <div class="d-row"><span>Location yet to be added</span><span style="font-weight:600;">${pending}</span></div>
       `;
     }
 
