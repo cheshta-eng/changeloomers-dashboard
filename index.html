@@ -10,6 +10,7 @@
 
 
 
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -662,6 +663,7 @@
     <section id="rosterTrend">
       <h2>Changeloomers roster · trend by batch year</h2>
       <p class="section-sub">Count per programme type, by batch year, from the "CL DATA CHESHTA" tab — same axes as the chart above.</p>
+      <div class="stat-strip" id="rosterStatStrip" style="margin-top:0; margin-bottom:26px;"></div>
       <div class="chart-shell">
         <div class="legend-row" id="rosterTrendLegend"></div>
         <div class="chart-scroll">
@@ -1751,6 +1753,23 @@ function extractStatesFromLocation(str){
 
 let INDIA_SVG_TEXT = null; // cached after first successful fetch
 
+function renderRosterStats(){
+  const el = document.getElementById("rosterStatStrip");
+  if(!el) return;
+
+  const total = ROSTER.length;
+  const batches = new Set(ROSTER.map(r=> r.batch).filter(Boolean));
+  const types = new Set(ROSTER.map(r=> r.type).filter(Boolean));
+  const orgs = new Set(ROSTER.map(r=> r.org).filter(Boolean));
+
+  el.innerHTML = `
+    <div class="cell"><div class="num">${total.toLocaleString()}</div><div class="label">Changeloomers in roster</div></div>
+    <div class="cell"><div class="num">${batches.size}</div><div class="label">batch years recorded</div></div>
+    <div class="cell"><div class="num">${types.size}</div><div class="label">programme types</div></div>
+    <div class="cell"><div class="num">${orgs.size}</div><div class="label">organisations</div></div>
+  `;
+}
+
 async function renderIndiaMap(){
   const wrap = document.getElementById("indiaMapWrap");
   if(!wrap) return;
@@ -1891,7 +1910,7 @@ function openStateModal(state, entries){
 }
 
 async function render(){
-  const steps = [renderLegend, renderStats, renderFunders, renderNomCards, renderHubOrgs, renderRoster, renderRosterTrend, renderIndiaMap, renderNomBubbles, renderFunderBubbles, buildChart];
+  const steps = [renderLegend, renderStats, renderFunders, renderNomCards, renderHubOrgs, renderRoster, renderRosterStats, renderRosterTrend, renderIndiaMap, renderNomBubbles, renderFunderBubbles, buildChart];
   steps.forEach(step=>{
     try{ step(); }
     catch(err){ console.error(`${step.name}() failed — skipping so the rest of the page still renders:`, err); }
