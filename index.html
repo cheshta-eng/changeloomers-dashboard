@@ -711,7 +711,10 @@
       <h2>Changeloomers roster · by state</h2>
       <p class="section-sub">Built from the "Location / Address" column in the "CL DATA CHESHTA" tab, plotted on a real India state-boundary map. Click a state to see the organisations and anchors there.</p>
       <div class="chart-shell">
-        <div id="indiaMapWrap" style="max-width:520px; margin:0 auto;"></div>
+        <div style="display:flex; gap:24px; align-items:flex-start; flex-wrap:wrap;">
+          <div id="indiaMapWrap" style="flex:1 1 480px; min-width:280px;"></div>
+          <div id="indiaMapStats" style="flex:0 1 240px; min-width:200px; background:var(--khadi-deep); border:1px solid var(--hairline); border-radius:12px; padding:16px 18px;"></div>
+        </div>
         <div class="chart-caption">
           <span>Map data: svg-maps/india (CC BY 4.0)</span>
         </div>
@@ -1764,6 +1767,19 @@ async function renderIndiaMap(){
     });
     const maxCount = Math.max(1, ...Object.values(byState).map(a=> a.length));
     const labelsGroup = document.createElementNS("http://www.w3.org/2000/svg","g");
+
+    const totalOnFile = ROSTER.length;
+    const withLocation = ROSTER.filter(r=> r.state && resolveStateName(r.state)).length;
+    const pending = totalOnFile - withLocation;
+    const statsEl = document.getElementById("indiaMapStats");
+    if(statsEl){
+      statsEl.innerHTML = `
+        <div class="bubble-label">At a glance</div>
+        <div class="d-row"><span>Total on file</span><span style="font-weight:600;">${totalOnFile}</span></div>
+        <div class="d-row"><span>Location on record</span><span style="font-weight:600;">${withLocation}</span></div>
+        <div class="d-row"><span>Location pending</span><span style="font-weight:600;">${pending}</span></div>
+      `;
+    }
 
     const allPaths = svgEl.querySelectorAll("path");
     const sample = Array.from(allPaths).slice(0,3).map(p=>
