@@ -12,6 +12,7 @@
 
 
 
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -694,23 +695,6 @@
       <div class="funder-grid" id="hubOrgGrid"></div>
     </section>
 
-    <section id="roster">
-      <h2>Changeloomers roster · by batch &amp; type</h2>
-      <p class="section-sub">Built from the "CL DATA CHESHTA" tab — count of people per cohort batch and per programme type.</p>
-      <div class="chart-shell">
-        <div style="display:grid; grid-template-columns:1fr 1fr; gap:32px;">
-          <div>
-            <div class="bubble-label">By batch year</div>
-            <div id="batchChart"></div>
-          </div>
-          <div>
-            <div class="bubble-label">By type</div>
-            <div id="typeChart"></div>
-          </div>
-        </div>
-      </div>
-    </section>
-
     <section id="indiaMap">
       <h2>Changeloomers roster · by state</h2>
       <p class="section-sub">Built from the "Location / Address" column in the "CL DATA CHESHTA" tab, plotted on a real India state-boundary map. Click a state to see the organisations and anchors there.</p>
@@ -852,7 +836,8 @@ let MILESTONES = [
 // "Hubs" and "Hub_Implementation" tabs whenever that data is ready.
 let HUB_ORGS = [];          // {id, name, desc}
 let HUB_IMPLEMENTATIONS = []; // {hub, nomenclature, year}
-let ROSTER = []; // {anchor, org, type, batch, link}
+let ROSTER = []; // {anchor, org, type, batch, location, state, cohort}
+let COHORTS = {}; // cohortName -> {year, funder, type, hub}
 
 function hubsForNomYear(nomName, year){
   return HUB_IMPLEMENTATIONS
@@ -950,8 +935,23 @@ function applySheetData(data){
         type: String(r["Type"]||"").trim(),
         batch: String(r["Changelooms Batch"]||"").trim(),
         location: String(r["Location / Address"]||"").trim(),
-        state: String(r["State"]||"").trim()
+        state: String(r["State"]||"").trim(),
+        cohort: String(r["Cohort"]||"").trim()
       }));
+  }
+
+  if(data.cohorts){
+    COHORTS = {};
+    data.cohorts.forEach(r=>{
+      const name = String(r["Cohort Name"]||"").trim();
+      if(!name) return;
+      COHORTS[name] = {
+        year: String(r["Year"]||"").trim(),
+        funder: String(r["Funder"]||"").trim(),
+        type: String(r["Type"]||"").trim(),
+        hub: String(r["Hub"]||"").trim()
+      };
+    });
   }
 }
 
@@ -1451,55 +1451,6 @@ function buildChart(){
 }
 /* ============ BOOT ============ */
 
-function renderRoster(){
-  const batchEl = document.getElementById("batchChart");
-  const typeEl = document.getElementById("typeChart");
-  if(!batchEl || !typeEl) return;
-
-  if(!ROSTER.length){
-    batchEl.innerHTML = `<div class="pending-pill">No roster data yet — check the "CL DATA CHESHTA" tab.</div>`;
-    typeEl.innerHTML = "";
-    return;
-  }
-
-  const byBatch = {}, byType = {};
-  ROSTER.forEach(r=>{
-    if(r.batch) byBatch[r.batch] = (byBatch[r.batch]||0) + 1;
-    if(r.type) byType[r.type] = (byType[r.type]||0) + 1;
-  });
-
-  const ROSTER_PALETTE = ["#D9971D","#4C7E93","#8FAF3E","#8B5E3C","#2F5C4E","#B4708C"];
-
-  const rosterBarChart = (obj)=>{
-    const entries = Object.entries(obj).sort((a,b)=> a[0].localeCompare(b[0]));
-    const max = Math.max(...entries.map(e=>e[1]), 1);
-    const rowH = 30;
-    const width = 560;
-    const height = entries.length * rowH + 8;
-    const labelW = 92;
-    const valueW = 30;
-    const barMaxW = width - labelW - valueW - 10;
-
-    let svg = `<svg viewBox="0 0 ${width} ${height}" xmlns="http://www.w3.org/2000/svg" style="width:100%; height:auto; display:block; margin-top:6px;">`;
-    entries.forEach(([label,count], i)=>{
-      const y = i * rowH;
-      const barW = (count / max) * barMaxW;
-      const color = ROSTER_PALETTE[i % ROSTER_PALETTE.length];
-      svg += `
-        <text x="0" y="${y + rowH/2 + 4}" font-family="IBM Plex Mono, monospace" font-size="11.5" fill="#514740">${label}</text>
-        <rect x="${labelW}" y="${y + 6}" width="${barMaxW}" height="14" rx="7" fill="rgba(61,54,47,0.08)"></rect>
-        <rect x="${labelW}" y="${y + 6}" width="${Math.max(barW,5)}" height="14" rx="7" fill="${color}"></rect>
-        <text x="${labelW + barMaxW + 8}" y="${y + rowH/2 + 4}" font-family="IBM Plex Mono, monospace" font-size="12" font-weight="600" fill="#3D362F">${count}</text>
-      `;
-    });
-    svg += `</svg>`;
-    return svg;
-  };
-
-  batchEl.innerHTML = rosterBarChart(byBatch);
-  typeEl.innerHTML = rosterBarChart(byType);
-}
-
 function renderRosterTrend(){
   const svg = document.getElementById("rosterTrendSvg");
   const legendEl = document.getElementById("rosterTrendLegend");
@@ -1911,7 +1862,7 @@ function openStateModal(state, entries){
 }
 
 async function render(){
-  const steps = [renderLegend, renderStats, renderFunders, renderNomCards, renderHubOrgs, renderRoster, renderRosterStats, renderRosterTrend, renderIndiaMap, renderNomBubbles, renderFunderBubbles, buildChart];
+  const steps = [renderLegend, renderStats, renderFunders, renderNomCards, renderHubOrgs, renderRosterStats, renderRosterTrend, renderIndiaMap, renderNomBubbles, renderFunderBubbles, buildChart];
   steps.forEach(step=>{
     try{ step(); }
     catch(err){ console.error(`${step.name}() failed — skipping so the rest of the page still renders:`, err); }
@@ -2027,19 +1978,38 @@ function openPointModal(h, year, val){
 const modalOverlay = document.getElementById("modalOverlay");
 function openRosterPointModal(type, year, count){
   const entries = ROSTER.filter(r => r.type === type && r.batch === year);
-  const rows = entries.map(e=>{
-    return `<div class="roster-row"><span class="r-name">${e.anchor}</span><span class="r-org">${e.org || "N/A"}</span></div>`;
+
+  const byCohort = {};
+  const cohortOrder = [];
+  entries.forEach(e=>{
+    const key = e.cohort || "";
+    if(!byCohort[key]){ byCohort[key] = []; cohortOrder.push(key); }
+    byCohort[key].push(e);
+  });
+
+  const sections = cohortOrder.map(cohortName=>{
+    const group = byCohort[cohortName];
+    const info = cohortName ? COHORTS[cohortName] : null;
+    const header = cohortName
+      ? `
+        <div class="roster-head" style="margin-top:18px;"><span>Cohort</span><span></span></div>
+        <div class="modal-row"><span>Type</span><span>${info && info.type ? info.type : type}</span></div>
+        <div class="modal-row"><span>Year</span><span>${info && info.year ? info.year : year}</span></div>
+        <div class="modal-row"><span>Name</span><span>${cohortName}</span></div>
+        <div class="modal-row"><span>Hub</span><span>${info && info.hub ? info.hub : "N/A"}</span></div>
+        <div class="modal-row"><span>Funder</span><span>${info && info.funder ? info.funder : "N/A"}</span></div>
+      `
+      : `<div class="roster-head" style="margin-top:18px;"><span>Cohort not specified</span><span></span></div>`;
+    const rows = group.map(e=>
+      `<div class="roster-row"><span class="r-name">${e.anchor}</span><span class="r-org">${e.org || "N/A"}</span></div>`
+    ).join("");
+    return header + `<div class="roster-list">${rows}</div>`;
   }).join("");
 
   openModal({
     eyebrow: type + " · " + year,
     title: count + " Changeloomers",
-    body: `
-      <div class="roster-head"><span>Anchors · ${year}</span><span>${type}</span></div>
-      <div class="roster-list">
-        ${rows || `<div class="pending-pill">No matching roster rows found</div>`}
-      </div>
-    `
+    body: sections || `<div class="pending-pill">No matching roster rows found</div>`
   });
 }
 
