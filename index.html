@@ -11,6 +11,7 @@
 
 
 
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -942,9 +943,9 @@ function applySheetData(data){
 
   if(data.clRoster){
     ROSTER = data.clRoster
-      .filter(r => r["Name of the Anchor"] && String(r["Name of the Anchor"]).trim())
+      .filter(r => r["Name"] && String(r["Name"]).trim())
       .map(r => ({
-        anchor: String(r["Name of the Anchor"]||"").trim(),
+        anchor: String(r["Name"]||"").trim(),
         org: String(r["Name of Organisation"]||"").trim(),
         type: String(r["Type"]||"").trim(),
         batch: String(r["Changelooms Batch"]||"").trim(),
