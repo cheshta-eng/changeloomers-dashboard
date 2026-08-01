@@ -626,43 +626,10 @@
   <h1>Changeloom's evolution over the years</h1>
   <p class="lede">Since 2005-06, the Changeloomers journey has been woven under shifting names — Changelooms, LLJ, CL-LLJ, Changemakers — as the programme responded to new partners, new geographies and new ideas of youth leadership. This is that thread, followed end to end.</p>
   <div class="thread-rule"><span class="t1"></span><span class="t2"></span><span class="t3"></span><span class="t4"></span></div>
-
-  <div class="stat-strip" id="statStrip"></div>
 </header>
 
 <div class="layout">
   <main>
-    <section id="journey">
-      <h2>Programme journey · evolution</h2>
-      <p class="section-sub">One continuous read from 2005-06 to 2025-26. Click any name below to trace a single thread through the merges and relaunches, click any dot for that year's detail, and click a gold flag for that year's partners. Below the chart, every nomenclature and funder also sits as its own clickable bubble, sized by how much it's carried. Shaded years on the right are open for 2020 onward — add the numbers as they come in.</p>
-      <div class="chart-shell">
-        <div class="legend-row" id="legendRow"></div>
-        <div class="chart-scroll">
-          <svg id="chartSvg" xmlns="http://www.w3.org/2000/svg"></svg>
-        </div>
-        <div class="chart-caption">
-          <span>No. of Changeloomers engaged, by cohort year</span>
-          <span id="chartHint">click any dot →</span>
-        </div>
-
-        <div class="bubble-cluster">
-          <div class="bubble-col">
-            <div class="bubble-block">
-              <div class="bubble-label">Nomenclatures · click to filter the graph + see the story</div>
-              <div class="bubble-row" id="nomBubbles"></div>
-            </div>
-            <div class="bubble-block">
-              <div class="bubble-label">Funders · click to highlight their years + see the story</div>
-              <div class="bubble-row" id="funderBubbles"></div>
-            </div>
-          </div>
-          <div class="detail-panel" id="detailPanel">
-            <div class="detail-placeholder">Click a nomenclature or funder bubble — its story shows up here while the graph stays visible and filters alongside it.</div>
-          </div>
-        </div>
-      </div>
-    </section>
-
     <section id="rosterTrend">
       <h2>Changeloomers roster · trend by batch year</h2>
       <p class="section-sub">Count per programme type, by batch year, from the "CL DATA CHESHTA" tab — same axes as the chart above.</p>
@@ -692,7 +659,7 @@
 
     <section id="hubs">
       <h2>Implementing hubs</h2>
-      <p class="section-sub">Hubs are the member organisations that run the journey on the ground — distinct from funders, who resource it. More than one hub can co-implement the same nomenclature in the same year. Click a hub for the years and tracks it's carried.</p>
+      <p class="section-sub">Built from the "Cohort" tab — which hub ran how many cohorts, in which years, for which programme type. Click a hub for the breakdown.</p>
       <div class="funder-grid" id="hubOrgGrid"></div>
     </section>
 
@@ -720,6 +687,39 @@
       <h2>Changeloomers films</h2>
       <p class="section-sub">Built from the "Changeloom Films" tab. Click a film to watch it and see who's featured.</p>
       <div class="funder-grid" id="filmGrid"></div>
+    </section>
+
+    <div class="stat-strip" id="statStrip"></div>
+
+    <section id="journey">
+      <h2>Programme journey · evolution</h2>
+      <p class="section-sub">One continuous read from 2005-06 to 2025-26. Click any name below to trace a single thread through the merges and relaunches, click any dot for that year's detail, and click a gold flag for that year's partners. Below the chart, every nomenclature and funder also sits as its own clickable bubble, sized by how much it's carried. Shaded years on the right are open for 2020 onward — add the numbers as they come in.</p>
+      <div class="chart-shell">
+        <div class="legend-row" id="legendRow"></div>
+        <div class="chart-scroll">
+          <svg id="chartSvg" xmlns="http://www.w3.org/2000/svg"></svg>
+        </div>
+        <div class="chart-caption">
+          <span>No. of Changeloomers engaged, by cohort year</span>
+          <span id="chartHint">click any dot →</span>
+        </div>
+
+        <div class="bubble-cluster">
+          <div class="bubble-col">
+            <div class="bubble-block">
+              <div class="bubble-label">Nomenclatures · click to filter the graph + see the story</div>
+              <div class="bubble-row" id="nomBubbles"></div>
+            </div>
+            <div class="bubble-block">
+              <div class="bubble-label">Funders · click to highlight their years + see the story</div>
+              <div class="bubble-row" id="funderBubbles"></div>
+            </div>
+          </div>
+          <div class="detail-panel" id="detailPanel">
+            <div class="detail-placeholder">Click a nomenclature or funder bubble — its story shows up here while the graph stays visible and filters alongside it.</div>
+          </div>
+        </div>
+      </div>
     </section>
 
   </main>
@@ -1234,30 +1234,39 @@ function renderHubOrgs(){
   const grid = document.getElementById("hubOrgGrid");
   grid.innerHTML = "";
 
-  if(!HUB_ORGS.length){
-    grid.innerHTML = `<div class="pending-pill">No hub organisations recorded yet \u2014 add them in the "Hubs" and "Hub_Implementation" tabs of the Google Sheet.</div>`;
+  const byHub = {};
+  Object.entries(COHORTS).forEach(([name, info])=>{
+    if(!info.hub) return;
+    if(!byHub[info.hub]) byHub[info.hub] = [];
+    byHub[info.hub].push({cohortName: name, year: info.year, type: info.type, funder: info.funder});
+  });
+
+  const hubNames = Object.keys(byHub).sort((a,b)=> a.localeCompare(b));
+  if(!hubNames.length){
+    grid.innerHTML = `<div class="pending-pill">No hubs recorded yet — check the "Cohort" tab's Hub column.</div>`;
     return;
   }
 
-  HUB_ORGS.forEach(hub=>{
-    const years = implementationsForHub(hub.name).length;
+  hubNames.forEach(hubName=>{
+    const cohorts = byHub[hubName];
     const chip = document.createElement("div");
     chip.className = "funder-chip";
-    chip.innerHTML = `${hub.name}${years ? `<span class="n">${years} cohort${years===1?"":"s"}</span>` : ""}`;
-    chip.addEventListener("click", ()=> openHubOrgModal(hub));
+    chip.innerHTML = `${hubName}<span class="n">${cohorts.length} cohort${cohorts.length===1?"":"s"}</span>`;
+    chip.addEventListener("click", ()=> openHubOrgModal(hubName, cohorts));
     grid.appendChild(chip);
   });
 }
 
-function openHubOrgModal(hub){
-  const rows = implementationsForHub(hub.name)
-    .map(hi=>`<div class="modal-row"><span>${hi.nomenclature}</span><span>${hi.year}</span></div>`)
+function openHubOrgModal(hubName, cohorts){
+  const rows = cohorts
+    .sort((a,b)=> String(a.year).localeCompare(String(b.year)))
+    .map(c=>`<div class="modal-row"><span>${c.year}</span><span>${c.type}</span><span>${c.cohortName}</span></div>`)
     .join("");
   openModal({
-    eyebrow:"Hub",
-    title:hub.name,
-    body:`
-      ${hub.desc ? `<p style="margin:0 0 12px;">${hub.desc}</p>` : ""}
+    eyebrow: "Hub",
+    title: hubName + " · " + cohorts.length + " cohort" + (cohorts.length===1?"":"s"),
+    body: `
+      <div class="modal-row" style="font-weight:600;"><span>Year</span><span>Type</span><span>Cohort</span></div>
       ${rows || `<div class="pending-pill">No cohorts linked to this hub yet</div>`}
     `
   });
