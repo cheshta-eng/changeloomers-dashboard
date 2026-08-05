@@ -16,6 +16,7 @@
 
 
 
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -88,6 +89,72 @@
   a{color:inherit;}
 
   /* ---------- HERO ---------- */
+  .preamble-banner{
+    background:var(--teal-deep);
+    padding:40px 32px;
+  }
+  .preamble-inner{
+    max-width:820px;
+    margin:0 auto;
+    text-align:center;
+  }
+  .preamble-inner blockquote{
+    font-family:'Fraunces', serif;
+    font-style:italic;
+    font-weight:300;
+    font-size:clamp(17px, 2.4vw, 22px);
+    line-height:1.6;
+    color:var(--paper);
+    margin:0;
+  }
+  .preamble-inner cite{
+    display:block;
+    margin-top:18px;
+    font-family:'IBM Plex Mono', monospace;
+    font-style:normal;
+    font-size:13px;
+    letter-spacing:0.03em;
+    color:var(--lime);
+  }
+
+  .story-dropdown{
+    background:var(--khadi);
+    border:1px solid var(--hairline);
+    border-radius:var(--radius);
+    padding:4px 24px;
+  }
+  .story-dropdown summary{
+    cursor:pointer;
+    padding:18px 0;
+    font-family:'Fraunces', serif;
+    font-size:20px;
+    font-weight:600;
+    color:var(--teal-deep);
+    list-style:none;
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+  }
+  .story-dropdown summary::-webkit-details-marker{display:none;}
+  .story-dropdown summary::after{
+    content:"+";
+    font-family:'IBM Plex Mono', monospace;
+    font-size:22px;
+    color:var(--brown);
+    transition:transform .2s ease;
+  }
+  .story-dropdown[open] summary::after{transform:rotate(45deg);}
+  .story-content{
+    padding-bottom:28px;
+  }
+  .story-content p{
+    font-size:15.5px;
+    line-height:1.75;
+    color:var(--ink);
+    margin:0 0 18px;
+  }
+  .story-content p:last-child{margin-bottom:0;}
+
   .hero{
     max-width:1180px;
     margin:0 auto;
@@ -620,6 +687,13 @@
 
 <div class="weave-field"></div>
 
+<div class="preamble-banner">
+  <div class="preamble-inner">
+    <blockquote>&ldquo;Your passion and purpose inspire; It reflects the compelling vision in your deliberations and experiments. The pain in your heart compels your mind to share your time with others as one but you also worry. This worry in your head, and the desire in your body and soul to go out there and make a difference &mdash; to make a better world, to be a better person is infectious as a playful smile. Tell us: how can we walk with you in your journey? We have a lot of learnings to share, and a small resource in the form of a SMILE Fellowship of Rs 2,000 per month, to support your initiative in any way you wish.&rdquo;</blockquote>
+    <cite>&mdash; Shivani Bhardwaj, IGSSS SMILE, New Delhi, 1994</cite>
+  </div>
+</div>
+
 <header class="hero">
   <div class="hero-blob" aria-hidden="true"></div>
   <div class="hero-top">
@@ -632,6 +706,23 @@
 
 <div class="layout">
   <main>
+    <section id="earlyInspirations">
+      <details class="story-dropdown">
+        <summary>Changelooms &ndash; Early Inspirations</summary>
+        <div class="story-content">
+          <p>The story of Changelooms is connected to the start-up story of Pravah in the early 1990s. It was a period of tremendous polarisation, violence and hatred, preceding and in the aftermath of the Babri Masjid demolition. We, as young people, were deeply disturbed and felt the need to express what we were feeling, to make sense of what was happening and why, to create a space for dialogue, to find solutions, and to build solidarities. But these spaces were few and far between in those times. In the corporate sector where we worked, it was considered taboo to discuss vexing social issues. Among our friends, we discovered new fault lines where alternate views were marginalised. The mainstream media thrived on the narrative of polarisation even in those times, though much less than now &mdash; remember, there was no internet, and media companies were far more independent then! Luckily, in our immediate families, we all did find a space to express and engage with what we were going through &mdash; but still, something was missing.</p>
+          <p>After much deliberation, we figured that we wanted to &lsquo;do&rsquo; something in the real world at the intersection of what we were most passionate about, what we felt the world needed, and what we were best at. As people with excellent design, facilitation and management skills, we developed the first-ever &lsquo;Positive Me&rsquo; &mdash; later called &lsquo;From Me to We&rsquo; &mdash; an inside out leadership journey for young people: our own formulation of a preventive approach to a range of social conflicts. The journey was aimed to enable young people make the connection from self to society and develop capacities of empathy, critical thinking, team building among others through a deep dive into self, exposure to social issues and exercising their agency to take positive actions in their own context, in their own ways.</p>
+          <p>It was in these early years that we found an amazing champion, friend, philosopher and needed guide, Shivani Bhardwaj. Shivani was with us in our earliest volunteer efforts including weekend workshops with young people in our residential colony and in schools such as Ramjas, Blue Bells and a Government school in Kheda Kalan. The workshops were a runaway &lsquo;success&rsquo; &mdash; word spread across schools and demand grew. It was then she who asked us a key question: &lsquo;Are you satisfied running this as a past-time project, or do you want to invest more of yourself and build an institution?&rsquo; It was not easy for us to move in this direction. NGOs were unfamiliar terrain for us and we had many concerns. How would we raise the resources to run an organisation? Why would people join us? What if we failed? But the idea was seeded. We were all doing well in our careers but we were indeed finding real meaning in this, and students kept coming back for more. When you enjoy something more, and are getting the learning of a lifetime from it, there is no choice, really &mdash; so we decided among us that we will give it all we got, with one person quitting their job and the other supporting fully at the back, and the idea of Pravah became a reality.</p>
+          <p>The first few years were not easy at all. Our homes became our office, our personal accounts became our budget, and I daresay we lost some of our friendships too due to differences of perspective in what kind of world we wanted to see and who we wanted to be. We were turned away by every donor agency that used to support other NGOs quite generously on issues of gender, education, displacement, livelihood, and so on, because they simply did not understand what we were doing. Schools still wanted us, that kept us going, but we had begun to wonder whether we were on the right track.</p>
+          <p>It was in these despondent times that the universe gifted us a significant turning point. A casual invitation by Shivani for a conversation to check in on us, how we were doing, our celebrations and challenges. Her words, something to the effect as quoted at the top of this write-up, were served to us like an ultimate love letter. She helped us confront our worst fears and uplifted our soul.</p>
+          <p>In many ways she created a powerful &lsquo;5th Space&rsquo; for us, with the five feelings of Love, Growth, Freedom, Ownership and Social Hope. Love is the feeling of having been seen, heard and hugged. Freedom is the feeling experienced when someone expresses full faith in you and the possibilities you present. Growth is in the opportunity you get to learn, experiment, make mistakes. Ownership is the feeling you experience when someone joins you in your efforts and makes it their own. And finally, Social Hope is the opportunity to be in the mission itself, the change you see in young people and the world around you in small but significant ways, and the solidarities and friendships we make.</p>
+          <p>And of course, the money counted too: the stipend she offered us was small by other fellowship standards, but was precious, and we saved four months of it to help Pravah buy our very first resource &mdash; a handbook of structured experiences by Pfeiffer and Jones, and a J. Krishnamurti compendium &mdash; which we used to develop and build our own designs and develop the field. Designs which continue to be used till date by thousands of young people and organisations across the country. Very soon after, we were also awarded the Ashoka Fellowship in 1996. We were among the youngest organisations in the fellowship at the time, and it paved the way for tremendous learning, exposure and world-wide recognition, and a very large community of fantastic social entrepreneurs.</p>
+          <p>It is in this recognition and in gratitude &mdash; not only to SMILE and Ashoka but also to the many people, friends, family, colleagues and hundreds of organisations, educators and administrators that enabled Pravah to find its feet &mdash; that the Changelooms Program was formulated. It is a pay-it-forward journey of Pravah that truly cherishes social entrepreneurs in their earliest and most vulnerable stages, where they only have a seed of an idea and stars in their eyes, with a desire to make a difference in the way only they can. In 2005, the first Changelooms Program was launched in partnership with Ashoka, as an inside-out learning and leadership journey and a collective space for young, early-stage social entrepreneurs, that identifies, celebrates and nurtures capacities, and supports them to develop their ideas into social change initiatives &mdash; hand-holding them to learn from their mistakes in the crucial birthing years of their ideas.</p>
+          <p>Because we genuinely believe Margaret Mead&rsquo;s words: &lsquo;Never doubt that a small group of thoughtful, committed citizens can change the world; indeed, it&rsquo;s the only thing that ever has&rsquo; &mdash; and Changelooms alumni all over the country are doing just that, in their own contexts and communities, even as they change themselves to become better learners and leaders on this journey called life.</p>
+        </div>
+      </details>
+    </section>
+
     <section id="rosterTrend">
       <h2>Changeloomers roster · trend by batch year</h2>
       <p class="section-sub">Count per programme type, by batch year, from the "CL DATA CHESHTA" tab — same axes as the chart above.</p>
