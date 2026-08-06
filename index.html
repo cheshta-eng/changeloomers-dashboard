@@ -18,6 +18,7 @@
 
 
 
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -729,14 +730,14 @@
 
     <section id="rosterTrend">
       <h2>The Changeloom Story - 20 Years of Celebrating Young Social Entrepreneurship</h2>
-      <div class="stat-strip" id="rosterStatStrip" style="margin-top:0; margin-bottom:26px;"></div>
+      <div class="stat-strip" id="rosterStatStrip" style="margin-top:0; margin-bottom:26px; grid-template-columns:repeat(3,1fr);"></div>
       <div class="chart-shell">
         <div class="legend-row" id="rosterTrendLegend"></div>
         <div class="chart-scroll">
           <svg id="rosterTrendSvg" xmlns="http://www.w3.org/2000/svg"></svg>
         </div>
         <div class="chart-caption">
-          <span>No. of Changeloomers (roster count), by batch year and type</span>
+          <span>No. of Changeloomers, by batch year and type</span>
         </div>
       </div>
     </section>
@@ -760,7 +761,7 @@
     </section>
 
     <section id="indiaMap">
-      <h2>Changeloomers roster · by state</h2>
+      <h2>Changeloomers · by state</h2>
       <p class="section-sub">Built from the "Location / Address" column in the "CL DATA CHESHTA" tab, plotted on a real India state-boundary map. Click a state to see the organisations and anchors there.</p>
       <div class="chart-shell">
         <div style="position:relative;">
@@ -781,7 +782,7 @@
 
     <section id="films">
       <h2>Changeloomers films</h2>
-      <p class="section-sub">Built from the "Changeloom Films" tab. Click a film to watch it and see who's featured.</p>
+      <p class="section-sub">Built from the "Changeloom Films" tab, ordered by release date. Click a film to watch it and see who's featured.</p>
       <div class="funder-grid" id="filmGrid"></div>
     </section>
 
@@ -1071,7 +1072,8 @@ function applySheetData(data){
       .map(r => ({
         anchor: String(r["Name of the Anchor"]||"").trim(),
         label: String(r["Youtube Changelooms Film link"]||"").trim(),
-        url: String(r["Youtube Changelooms Film link_URL"]||"").trim()
+        url: String(r["Youtube Changelooms Film link_URL"]||"").trim(),
+        releaseDate: String(r["Release Date"]||"").trim()
       }));
   }
 }
@@ -1591,7 +1593,7 @@ function renderRosterTrend(){
   if(legendEl) legendEl.innerHTML = "";
 
   if(!ROSTER.length){
-    svg.outerHTML = `<div class="pending-pill">No roster data yet — check the "CL DATA CHESHTA" tab.</div>`;
+    svg.outerHTML = `<div class="pending-pill">No data yet — check the "CL DATA CHESHTA" tab.</div>`;
     return;
   }
 
@@ -1609,7 +1611,7 @@ function renderRosterTrend(){
 
   const rosterYears = Array.from(yearSet).sort((a,b)=> a.localeCompare(b));
   if(!rosterYears.length){
-    svg.outerHTML = `<div class="pending-pill">No batch years found in the roster data.</div>`;
+    svg.outerHTML = `<div class="pending-pill">No batch years found in the data.</div>`;
     return;
   }
 
@@ -1841,14 +1843,13 @@ function renderRosterStats(){
   const el = document.getElementById("rosterStatStrip");
   if(!el) return;
 
-  const total = ROSTER.length;
   const orgs = new Set(ROSTER.map(r=> r.org).filter(Boolean));
   const states = new Set(
     ROSTER.map(r=> r.state ? resolveStateName(r.state) : null).filter(Boolean)
   );
 
   el.innerHTML = `
-    <div class="cell"><div class="num">${total.toLocaleString()} <span style="font-size:16px; font-weight:500; color:var(--brown);">(716 estimated changeloomers)</span></div><div class="label">Changeloomers in roster</div></div>
+    <div class="cell"><div class="num" style="color:#B4384A; font-size:26px; white-space:nowrap;">(716 estimated changeloomers)</div></div>
     <div class="cell"><div class="num">${states.size}</div><div class="label">States</div></div>
     <div class="cell"><div class="num">${orgs.size}</div><div class="label">organisations</div></div>
   `;
@@ -1868,7 +1869,7 @@ async function renderIndiaMap(){
   }
 
   if(!ROSTER.length){
-    wrap.innerHTML = `<div class="pending-pill">No roster data yet — check the "CL DATA CHESHTA" tab.</div>`;
+    wrap.innerHTML = `<div class="pending-pill">No data yet — check the "CL DATA CHESHTA" tab.</div>`;
     diag.textContent = "";
     return;
   }
@@ -2054,9 +2055,17 @@ function renderFilms(){
   const filmOrder = [];
   FILMS.forEach(f=>{
     const key = f.url || f.label || "Untitled";
-    if(!byFilm[key]){ byFilm[key] = { label: f.label || "Untitled", url: f.url, anchors: [] }; filmOrder.push(key); }
+    if(!byFilm[key]){ byFilm[key] = { label: f.label || "Untitled", url: f.url, anchors: [], releaseDate: f.releaseDate || "" }; filmOrder.push(key); }
     byFilm[key].anchors.push(f.anchor);
+    if(!byFilm[key].releaseDate && f.releaseDate) byFilm[key].releaseDate = f.releaseDate;
   });
+
+  const dateTime = (str)=>{
+    if(!str) return Infinity; // no date on file — sort to the end
+    const t = new Date(str).getTime();
+    return isNaN(t) ? Infinity : t;
+  };
+  filmOrder.sort((a,b)=> dateTime(byFilm[a].releaseDate) - dateTime(byFilm[b].releaseDate));
 
   filmOrder.forEach(key=>{
     const film = byFilm[key];
@@ -2076,7 +2085,7 @@ function openFilmModal(film){
     `<div class="roster-row"><span class="r-name">${a}</span></div>`
   ).join("");
   openModal({
-    eyebrow: "Film",
+    eyebrow: film.releaseDate ? "Film · " + film.releaseDate : "Film",
     title: film.label,
     body: `${watchLink}<div class="roster-head"><span>Featured</span><span></span></div><div class="roster-list">${rows}</div>`
   });
@@ -2230,7 +2239,7 @@ function openRosterPointModal(type, year, count){
   openModal({
     eyebrow: type + " · " + year,
     title: count + " Changeloomers",
-    body: sections || `<div class="pending-pill">No matching roster rows found</div>`
+    body: sections || `<div class="pending-pill">No matching records found</div>`
   });
 }
 
