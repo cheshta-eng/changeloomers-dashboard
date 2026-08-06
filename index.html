@@ -17,6 +17,7 @@
 
 
 
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -689,8 +690,7 @@
 
 <div class="preamble-banner">
   <div class="preamble-inner">
-    <blockquote>&ldquo;Your passion and purpose inspire; It reflects the compelling vision in your deliberations and experiments. The pain in your heart compels your mind to share your time with others as one but you also worry. This worry in your head, and the desire in your body and soul to go out there and make a difference &mdash; to make a better world, to be a better person is infectious as a playful smile. Tell us: how can we walk with you in your journey? We have a lot of learnings to share, and a small resource in the form of a SMILE Fellowship of Rs 2,000 per month, to support your initiative in any way you wish.&rdquo;</blockquote>
-    <cite>&mdash; Shivani Bhardwaj, IGSSS SMILE, New Delhi, 1994</cite>
+    <blockquote>This space is reserved for your words. Changeloomers, past and present — send us the quote, memory or reflection that captures what this journey has meant to you, and we'll feature it here.</blockquote>
   </div>
 </div>
 
@@ -710,6 +710,8 @@
       <details class="story-dropdown">
         <summary>Changelooms &ndash; Early Inspirations</summary>
         <div class="story-content">
+          <blockquote style="font-family:'Fraunces', serif; font-style:italic; font-weight:300; font-size:17px; line-height:1.6; color:var(--teal-deep); margin:0 0 6px; padding-left:16px; border-left:3px solid var(--gold-deep);">&ldquo;Your passion and purpose inspire; It reflects the compelling vision in your deliberations and experiments. The pain in your heart compels your mind to share your time with others as one but you also worry. This worry in your head, and the desire in your body and soul to go out there and make a difference &mdash; to make a better world, to be a better person is infectious as a playful smile. Tell us: how can we walk with you in your journey? We have a lot of learnings to share, and a small resource in the form of a SMILE Fellowship of Rs 2,000 per month, to support your initiative in any way you wish.&rdquo;</blockquote>
+          <cite style="display:block; margin:0 0 24px; padding-left:16px; font-family:'IBM Plex Mono', monospace; font-style:normal; font-size:12.5px; color:var(--ink-soft);">&mdash; Shivani Bhardwaj, IGSSS SMILE, New Delhi, 1994</cite>
           <p>The story of Changelooms is connected to the start-up story of Pravah in the early 1990s. It was a period of tremendous polarisation, violence and hatred, preceding and in the aftermath of the Babri Masjid demolition. We, as young people, were deeply disturbed and felt the need to express what we were feeling, to make sense of what was happening and why, to create a space for dialogue, to find solutions, and to build solidarities. But these spaces were few and far between in those times. In the corporate sector where we worked, it was considered taboo to discuss vexing social issues. Among our friends, we discovered new fault lines where alternate views were marginalised. The mainstream media thrived on the narrative of polarisation even in those times, though much less than now &mdash; remember, there was no internet, and media companies were far more independent then! Luckily, in our immediate families, we all did find a space to express and engage with what we were going through &mdash; but still, something was missing.</p>
           <p>After much deliberation, we figured that we wanted to &lsquo;do&rsquo; something in the real world at the intersection of what we were most passionate about, what we felt the world needed, and what we were best at. As people with excellent design, facilitation and management skills, we developed the first-ever &lsquo;Positive Me&rsquo; &mdash; later called &lsquo;From Me to We&rsquo; &mdash; an inside out leadership journey for young people: our own formulation of a preventive approach to a range of social conflicts. The journey was aimed to enable young people make the connection from self to society and develop capacities of empathy, critical thinking, team building among others through a deep dive into self, exposure to social issues and exercising their agency to take positive actions in their own context, in their own ways.</p>
           <p>It was in these early years that we found an amazing champion, friend, philosopher and needed guide, Shivani Bhardwaj. Shivani was with us in our earliest volunteer efforts including weekend workshops with young people in our residential colony and in schools such as Ramjas, Blue Bells and a Government school in Kheda Kalan. The workshops were a runaway &lsquo;success&rsquo; &mdash; word spread across schools and demand grew. It was then she who asked us a key question: &lsquo;Are you satisfied running this as a past-time project, or do you want to invest more of yourself and build an institution?&rsquo; It was not easy for us to move in this direction. NGOs were unfamiliar terrain for us and we had many concerns. How would we raise the resources to run an organisation? Why would people join us? What if we failed? But the idea was seeded. We were all doing well in our careers but we were indeed finding real meaning in this, and students kept coming back for more. When you enjoy something more, and are getting the learning of a lifetime from it, there is no choice, really &mdash; so we decided among us that we will give it all we got, with one person quitting their job and the other supporting fully at the back, and the idea of Pravah became a reality.</p>
@@ -723,9 +725,10 @@
       </details>
     </section>
 
+    <p style="max-width:1180px; margin:0 auto; padding:0 32px; font-family:'IBM Plex Mono', monospace; font-size:12.5px; color:var(--brown); font-style:italic;">*Data is still being collated &mdash; figures in red indicate our estimated numbers.</p>
+
     <section id="rosterTrend">
-      <h2>Changeloomers roster · trend by batch year</h2>
-      <p class="section-sub">Count per programme type, by batch year, from the "CL DATA CHESHTA" tab — same axes as the chart above.</p>
+      <h2>The Changeloom Story - 20 Years of Celebrating Young Social Entrepreneurship</h2>
       <div class="stat-strip" id="rosterStatStrip" style="margin-top:0; margin-bottom:26px;"></div>
       <div class="chart-shell">
         <div class="legend-row" id="rosterTrendLegend"></div>
@@ -1839,16 +1842,14 @@ function renderRosterStats(){
   if(!el) return;
 
   const total = ROSTER.length;
-  const types = new Set(ROSTER.map(r=> r.type).filter(Boolean));
   const orgs = new Set(ROSTER.map(r=> r.org).filter(Boolean));
   const states = new Set(
     ROSTER.map(r=> r.state ? resolveStateName(r.state) : null).filter(Boolean)
   );
 
   el.innerHTML = `
-    <div class="cell"><div class="num">${total.toLocaleString()}</div><div class="label">Changeloomers in roster</div></div>
+    <div class="cell"><div class="num">${total.toLocaleString()} <span style="font-size:16px; font-weight:500; color:var(--brown);">(716 estimated changeloomers)</span></div><div class="label">Changeloomers in roster</div></div>
     <div class="cell"><div class="num">${states.size}</div><div class="label">States</div></div>
-    <div class="cell"><div class="num">${types.size}</div><div class="label">programme types</div></div>
     <div class="cell"><div class="num">${orgs.size}</div><div class="label">organisations</div></div>
   `;
 }
