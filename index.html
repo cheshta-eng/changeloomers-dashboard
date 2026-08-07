@@ -20,6 +20,7 @@
 
 
 
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -1844,13 +1845,14 @@ function renderRosterStats(){
   const el = document.getElementById("rosterStatStrip");
   if(!el) return;
 
+  const total = ROSTER.length;
   const orgs = new Set(ROSTER.map(r=> r.org).filter(Boolean));
   const states = new Set(
     ROSTER.map(r=> r.state ? resolveStateName(r.state) : null).filter(Boolean)
   );
 
   el.innerHTML = `
-    <div class="cell"><div class="num" style="color:#B4384A; font-size:26px; white-space:nowrap;">(716 estimated changeloomers)</div></div>
+    <div class="cell"><div class="num" style="white-space:nowrap;">${total.toLocaleString()} <span style="color:#B4384A;">(716 estimated changeloomers)</span></div></div>
     <div class="cell"><div class="num">${states.size}</div><div class="label">States</div></div>
     <div class="cell"><div class="num">${orgs.size}</div><div class="label">organisations</div></div>
   `;
