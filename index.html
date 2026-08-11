@@ -24,6 +24,7 @@
 
 
 
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -1218,6 +1219,18 @@ function findProfile(anchorName){
   return PROFILES[normalizeProfileName(anchorName)] || null;
 }
 
+// Prefers the live "Profiles" column (J) in the sheet for this exact person,
+// whenever it's filled in — falls back to the static Drive-derived dataset
+// only if the sheet doesn't have one yet.
+function getProfile(anchorName){
+  const norm = normalizeProfileName(anchorName);
+  const rosterEntry = ROSTER.find(r => normalizeProfileName(r.anchor) === norm && r.profileText);
+  if(rosterEntry){
+    return { name: rosterEntry.anchor, org: rosterEntry.org, text: rosterEntry.profileText, certain: true };
+  }
+  return findProfile(anchorName);
+}
+
 function hubsForNomYear(nomName, year){
   return HUB_IMPLEMENTATIONS
     .filter(hi => hi.nomenclature === nomName && hi.year === year)
@@ -1316,7 +1329,8 @@ function applySheetData(data){
         location: String(r["Location / Address"]||"").trim(),
         state: String(r["State"]||"").trim(),
         cohort: String(r["Cohort"]||"").trim(),
-        mentor: String(r["Mentors"]||"").trim()
+        mentor: String(r["Mentors"]||"").trim(),
+        profileText: String(r["Profiles"]||"").trim()
       }));
   }
 
@@ -2506,7 +2520,7 @@ function openRosterPointModal(type, year, count){
       `
       : `<div class="roster-head" style="margin-top:18px;"><span>Cohort not specified</span><span></span></div>`;
     const rows = group.map(e=>{
-      const profile = findProfile(e.anchor);
+      const profile = getProfile(e.anchor);
       const nameHtml = profile
         ? `<span class="r-name" style="cursor:pointer; text-decoration:underline; text-decoration-style:dotted;" onclick="openProfileModal('${e.anchor.replace(/'/g,"\\'")}')">${e.anchor}</span>`
         : `<span class="r-name">${e.anchor}</span>`;
@@ -2523,7 +2537,7 @@ function openRosterPointModal(type, year, count){
 }
 
 function openProfileModal(anchorName){
-  const profile = findProfile(anchorName);
+  const profile = getProfile(anchorName);
   if(!profile) return;
   const uncertainNote = profile.certain === false
     ? `<div class="pending-pill" style="margin-bottom:10px;">Not certain this is the same person — please verify</div>`
