@@ -26,6 +26,7 @@
 
 
 
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -771,7 +772,7 @@
 
     <section id="films">
       <h2>Changeloomers films</h2>
-      <p class="section-sub">Built from the "Changeloom Films" tab, ordered by release date. Click a film to watch it and see who's featured.</p>
+      <p class="section-sub">Built from the "Youtube Changelooms Film link" column in "CL DATA CHESHTA". Click a film to see who's featured in it.</p>
       <div class="funder-grid" id="filmGrid"></div>
     </section>
 
@@ -1312,7 +1313,8 @@ function applySheetData(data){
         state: String(r["State"]||"").trim(),
         cohort: String(r["Cohort"]||"").trim(),
         mentor: String(r["Mentors"]||"").trim(),
-        profileText: String(r["Profiles"]||"").trim()
+        profileText: String(r["Profiles"]||"").trim(),
+        filmLabel: String(r["Youtube Changelooms Film link"]||"").trim()
       }));
   }
 
@@ -2317,48 +2319,38 @@ function renderFilms(){
   if(!grid) return;
   grid.innerHTML = "";
 
-  if(!FILMS.length){
-    grid.innerHTML = `<div class="pending-pill">No films recorded yet — check the "Changeloom Films" tab.</div>`;
+  const entries = ROSTER.filter(r => r.filmLabel);
+  if(!entries.length){
+    grid.innerHTML = `<div class="pending-pill">No films recorded yet — check the "Youtube Changelooms Film link" column in "CL DATA CHESHTA".</div>`;
     return;
   }
 
   const byFilm = {};
   const filmOrder = [];
-  FILMS.forEach(f=>{
-    const key = f.url || f.label || "Untitled";
-    if(!byFilm[key]){ byFilm[key] = { label: f.label || "Untitled", url: f.url, anchors: [], releaseDate: f.releaseDate || "" }; filmOrder.push(key); }
-    byFilm[key].anchors.push(f.anchor);
-    if(!byFilm[key].releaseDate && f.releaseDate) byFilm[key].releaseDate = f.releaseDate;
+  entries.forEach(r=>{
+    const key = r.filmLabel;
+    if(!byFilm[key]){ byFilm[key] = { label: key, people: [] }; filmOrder.push(key); }
+    byFilm[key].people.push(r);
   });
-
-  const dateTime = (str)=>{
-    if(!str) return Infinity; // no date on file — sort to the end
-    const t = new Date(str).getTime();
-    return isNaN(t) ? Infinity : t;
-  };
-  filmOrder.sort((a,b)=> dateTime(byFilm[a].releaseDate) - dateTime(byFilm[b].releaseDate));
 
   filmOrder.forEach(key=>{
     const film = byFilm[key];
     const chip = document.createElement("div");
     chip.className = "funder-chip";
-    chip.innerHTML = `${film.label}<span class="n">${film.anchors.length} featured</span>`;
+    chip.innerHTML = `${film.label}<span class="n">${film.people.length} featured</span>`;
     chip.addEventListener("click", ()=> openFilmModal(film));
     grid.appendChild(chip);
   });
 }
 
 function openFilmModal(film){
-  const watchLink = film.url
-    ? `<a href="${film.url}" target="_blank" rel="noopener" style="display:inline-block; margin:10px 0 4px; color:var(--brown); font-weight:600; text-decoration:underline;">▶ Watch this film</a>`
-    : `<div class="pending-pill">No video link on file for this one yet</div>`;
-  const rows = film.anchors.map(a=>
-    `<div class="roster-row"><span class="r-name">${a}</span></div>`
+  const rows = film.people.map(r=>
+    `<div class="roster-row"><span class="r-name">${r.anchor}</span><span class="r-org">${r.org || "N/A"}</span></div>`
   ).join("");
   openModal({
-    eyebrow: film.releaseDate ? "Film · " + film.releaseDate : "Film",
+    eyebrow: "Film",
     title: film.label,
-    body: `${watchLink}<div class="roster-head"><span>Featured</span><span></span></div><div class="roster-list">${rows}</div>`
+    body: `<div class="roster-head"><span>Featured</span><span></span></div><div class="roster-list">${rows}</div>`
   });
 }
 
