@@ -27,6 +27,7 @@
 
 
 
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -1327,7 +1328,8 @@ function applySheetData(data){
         year: String(r["Year"]||"").trim(),
         funder: String(r["Funder"]||"").trim(),
         type: String(r["Type"]||"").trim(),
-        hub: String(r["Hub"]||"").trim()
+        hub: String(r["Hub"]||"").trim(),
+        driveLink: String(r["Drive Link"]||"").trim()
       };
     });
   }
@@ -1602,7 +1604,7 @@ function renderHubOrgs(){
   Object.entries(COHORTS).forEach(([name, info])=>{
     if(!info.hub) return;
     if(!byHub[info.hub]) byHub[info.hub] = [];
-    byHub[info.hub].push({cohortName: name, year: info.year, type: info.type, funder: info.funder});
+    byHub[info.hub].push({cohortName: name, year: info.year, type: info.type, funder: info.funder, driveLink: info.driveLink});
   });
 
   const hubNames = Object.keys(byHub).sort((a,b)=> a.localeCompare(b));
@@ -1626,7 +1628,12 @@ function renderHubOrgs(){
 function openHubOrgModal(hubName, cohorts){
   const rows = cohorts
     .sort((a,b)=> String(a.year).localeCompare(String(b.year)))
-    .map(c=>`<div class="modal-row"><span>${c.year}</span><span>${c.type}</span><span>${c.cohortName}</span></div>`)
+    .map(c=>{
+      const cohortDisplay = c.driveLink
+        ? `<a href="${c.driveLink}" target="_blank" rel="noopener" style="color:var(--brown); font-weight:600; text-decoration:underline;">${c.cohortName} \u2197</a>`
+        : c.cohortName;
+      return `<div class="modal-row"><span>${c.year}</span><span>${c.type}</span><span>${cohortDisplay}</span></div>`;
+    })
     .join("");
   openModal({
     eyebrow: "Hub",
@@ -2483,12 +2490,15 @@ function openRosterPointModal(type, year, count){
   const sections = cohortOrder.map(cohortName=>{
     const group = byCohort[cohortName];
     const info = cohortName ? COHORTS[cohortName] : null;
+    const nameValue = (info && info.driveLink)
+      ? `<a href="${info.driveLink}" target="_blank" rel="noopener" style="color:var(--brown); font-weight:600; text-decoration:underline;">${cohortName} \u2197</a>`
+      : cohortName;
     const header = cohortName
       ? `
         <div class="roster-head" style="margin-top:18px;"><span>Cohort</span><span></span></div>
         <div class="modal-row"><span>Type</span><span>${info && info.type ? info.type : type}</span></div>
         <div class="modal-row"><span>Year</span><span>${info && info.year ? info.year : year}</span></div>
-        <div class="modal-row"><span>Name</span><span>${cohortName}</span></div>
+        <div class="modal-row"><span>Name</span><span>${nameValue}</span></div>
         <div class="modal-row"><span>Hub</span><span>${info && info.hub ? info.hub : "N/A"}</span></div>
         <div class="modal-row"><span>Funder</span><span>${info && info.funder ? info.funder : "N/A"}</span></div>
       `
