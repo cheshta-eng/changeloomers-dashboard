@@ -28,6 +28,7 @@
 
 
 
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -1315,7 +1316,8 @@ function applySheetData(data){
         cohort: String(r["Cohort"]||"").trim(),
         mentor: String(r["Mentors"]||"").trim(),
         profileText: String(r["Profiles"]||"").trim(),
-        filmLabel: String(r["Youtube Changelooms Film link"]||"").trim()
+        filmLabel: String(r["Youtube Changelooms Film link"]||"").trim(),
+        pictureLink: String(r["Drive Picture Link"]||"").trim()
       }));
   }
 
@@ -2505,7 +2507,8 @@ function openRosterPointModal(type, year, count){
       : `<div class="roster-head" style="margin-top:18px;"><span>Cohort not specified</span><span></span></div>`;
     const rows = group.map(e=>{
       const profile = getProfile(e.anchor);
-      const nameHtml = profile
+      const clickable = profile || e.pictureLink;
+      const nameHtml = clickable
         ? `<span class="r-name" style="cursor:pointer; text-decoration:underline; text-decoration-style:dotted;" onclick="openProfileModal('${e.anchor.replace(/'/g,"\\'")}')">${e.anchor}</span>`
         : `<span class="r-name">${e.anchor}</span>`;
       return `<div class="roster-row">${nameHtml}<span class="r-org">${e.org || "N/A"}</span></div>`;
@@ -2521,15 +2524,27 @@ function openRosterPointModal(type, year, count){
 }
 
 function openProfileModal(anchorName){
+  const norm = normalizeProfileName(anchorName);
+  const rosterMatch = ROSTER.find(r => normalizeProfileName(r.anchor) === norm);
   const profile = getProfile(anchorName);
-  if(!profile) return;
-  const uncertainNote = profile.certain === false
+  const pictureLink = rosterMatch ? rosterMatch.pictureLink : "";
+
+  if(!profile && !pictureLink) return;
+
+  const uncertainNote = (profile && profile.certain === false)
     ? `<div class="pending-pill" style="margin-bottom:10px;">Not certain this is the same person — please verify</div>`
     : "";
+  const pictureRow = pictureLink
+    ? `<a href="${pictureLink}" target="_blank" rel="noopener" style="display:inline-block; margin-bottom:12px; color:var(--brown); font-weight:600; text-decoration:underline;">🖼️ View picture</a>`
+    : "";
+  const textBlock = profile
+    ? `<p style="margin:0; line-height:1.65; color:var(--ink);">${profile.text}</p>`
+    : "";
+
   openModal({
-    eyebrow: profile.org || "Profile",
-    title: profile.name,
-    body: `${uncertainNote}<p style="margin:0; line-height:1.65; color:var(--ink);">${profile.text}</p>`
+    eyebrow: (profile && profile.org) || (rosterMatch && rosterMatch.org) || "Profile",
+    title: (profile && profile.name) || anchorName,
+    body: `${uncertainNote}${pictureRow}${textBlock}`
   });
 }
 
