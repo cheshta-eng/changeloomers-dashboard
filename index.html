@@ -29,6 +29,7 @@
 
 
 
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -769,7 +770,12 @@
     <section id="mentors">
       <h2>Changeloomers mentors</h2>
       <p class="section-sub">Built from the "Mentors" column in the "CL DATA CHESHTA" tab. Click a mentor to see who they've mentored — organisation, type, cohort and year.</p>
-      <div class="funder-grid" id="mentorGrid"></div>
+      <div class="chart-shell">
+        <div style="position:relative;">
+          <div class="funder-grid" id="mentorGrid"></div>
+          <div id="mentorStats" style="position:absolute; top:6px; right:6px; background:var(--khadi-deep); border:1px solid var(--hairline); border-radius:12px; padding:14px 16px; min-width:190px;"></div>
+        </div>
+      </div>
     </section>
 
     <section id="films">
@@ -910,19 +916,10 @@ let NOMS = [
 
 // funders: {name, years:[...], amount}
 let FUNDERS = [
-  {name:"Ashoka India", years:["2005-06"]},
-  {name:"Global Fund for Children", years:["2005-06"]},
-  {name:"SRTT", years:["2007-08","2008-09"]},
-  {name:"IDS", years:["2008-09"]},
-  {name:"DKA", years:["2008-09"]},
-  {name:"UNFPA", years:["2010-11"]},
-  {name:"PACS", years:["2014-15"]},
-  {name:"Oracle", years:["2016-17","2017-18","2018-19","2019-20"]},
-  {name:"GKS", years:["2016-17"]},
-  {name:"Fossil", years:["2017-18"]},
-  {name:"C3-Unniti", years:["2017-18"]},
-  {name:"US Government", years:["2019-20"]},
-  {name:"Individual Donors", years:["2019-20"]}
+  {name:"Rainmatter Foundation", years:["2023","2024","2025","2026"]},
+  {name:"DKA", years:["2023","2024","2025","2026"]},
+  {name:"Ford Foundation", years:["2024"]},
+  {name:"RNP", years:["2025"]}
 ];
 
 let MILESTONES = [
@@ -1262,15 +1259,21 @@ function applySheetData(data){
     if(newNoms.length) NOMS = newNoms;
   }
 
-  if(data.funders && data.funders.length){
-    const newFunders = data.funders
-      // require BOTH name and at least one valid year — same note-row guard
-      .filter(r => r.Name && String(r.Name).trim() && r.Years && String(r.Years).trim())
-      .map(r => ({
-        name: String(r.Name).trim(),
-        years: String(r.Years || "").split(",").map(y=>y.trim()).filter(Boolean)
-      }))
-      .filter(f => f.years.length > 0);
+  if(data.cohorts && data.cohorts.length){
+    const funderMap = {};
+    data.cohorts.forEach(r=>{
+      const funderRaw = String(r["Funder"]||"").trim();
+      const yearRaw = String(r["Year"]||"").trim();
+      if(!funderRaw || !yearRaw) return;
+      funderRaw.split(",").map(f=> f.trim()).filter(Boolean).forEach(fname=>{
+        if(!funderMap[fname]) funderMap[fname] = new Set();
+        funderMap[fname].add(yearRaw);
+      });
+    });
+    const newFunders = Object.entries(funderMap).map(([name, yearsSet])=> ({
+      name,
+      years: Array.from(yearsSet).sort()
+    }));
     if(newFunders.length) FUNDERS = newFunders;
   }
 
@@ -1649,12 +1652,26 @@ function openHubOrgModal(hubName, cohorts){
 
 /* ============ NOMENCLATURE CARDS ============ */
 
+function cohortYearsForNom(nomName){
+  const years = new Set();
+  Object.values(COHORTS).forEach(info=>{
+    if(info.type === nomName && info.year) years.add(info.year);
+  });
+  return Array.from(years).sort();
+}
+
 function renderNomCards(){
   const nomGrid = document.getElementById("nomGrid");
   nomGrid.innerHTML = "";
   NOMS.forEach(h=>{
     const yrs = Object.keys(h.data);
-    const range = yrs.length ? `${yrs[0]} \u2013 ${yrs[yrs.length-1]}` : "cohort years pending";
+    let range;
+    if(yrs.length){
+      range = `${yrs[0]} \u2013 ${yrs[yrs.length-1]}`;
+    } else {
+      const cohortYrs = cohortYearsForNom(h.name);
+      range = cohortYrs.length ? `${cohortYrs[0]} \u2013 ${cohortYrs[cohortYrs.length-1]}` : "cohort years pending";
+    }
     const card = document.createElement("div");
     card.className = "nom-card";
     card.innerHTML = `
@@ -1711,7 +1728,7 @@ function findYearIndex(yearsArr, milestoneYear){
 }
 
 function yearFunders(year){
-  return FUNDERS.filter(f=> f.years.includes(year)).map(f=>f.name);
+  return FUNDERS.filter(f=> f.years.some(fy=> fy === year || year.startsWith(fy) || fy.startsWith(year))).map(f=>f.name);
 }
 
 function buildChart(){
@@ -2291,6 +2308,19 @@ function renderMentors(){
   });
 
   const mentorNames = Object.keys(byMentor).sort((a,b)=> a.localeCompare(b));
+
+  const statsEl = document.getElementById("mentorStats");
+  if(statsEl){
+    const totalMentors = mentorNames.length;
+    const totalMentees = ROSTER.filter(r=> r.mentor).length;
+    const pending = ROSTER.length - totalMentees;
+    statsEl.innerHTML = `
+      <div class="d-row"><span>Total Mentors</span><span style="font-weight:600;">${totalMentors}</span></div>
+      <div class="d-row"><span>Mentees on Record</span><span style="font-weight:600;">${totalMentees}</span></div>
+      <div class="d-row"><span>Yet to be Filled</span><span style="font-weight:600;">${pending}</span></div>
+    `;
+  }
+
   if(!mentorNames.length){
     grid.innerHTML = `<div class="pending-pill">No mentors recorded yet — check the "Mentors" column in "CL DATA CHESHTA".</div>`;
     return;
