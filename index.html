@@ -30,6 +30,7 @@
 
 
 
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -771,9 +772,9 @@
       <h2>Changeloomers mentors</h2>
       <p class="section-sub">Built from the "Mentors" column in the "CL DATA CHESHTA" tab. Click a mentor to see who they've mentored — organisation, type, cohort and year.</p>
       <div class="chart-shell">
-        <div style="position:relative;">
-          <div class="funder-grid" id="mentorGrid"></div>
-          <div id="mentorStats" style="position:absolute; top:6px; right:6px; background:var(--khadi-deep); border:1px solid var(--hairline); border-radius:12px; padding:14px 16px; min-width:190px;"></div>
+        <div style="display:flex; gap:20px; align-items:flex-start; flex-wrap:wrap;">
+          <div class="funder-grid" id="mentorGrid" style="flex:1 1 480px;"></div>
+          <div id="mentorStats" style="flex:0 0 220px; min-width:200px; background:var(--khadi-deep); border:1px solid var(--hairline); border-radius:12px; padding:14px 16px;"></div>
         </div>
       </div>
     </section>
@@ -2303,8 +2304,11 @@ function renderMentors(){
   const byMentor = {};
   ROSTER.forEach(r=>{
     if(!r.mentor) return;
-    if(!byMentor[r.mentor]) byMentor[r.mentor] = [];
-    byMentor[r.mentor].push(r);
+    const names = r.mentor.split("&").map(n=> n.trim()).filter(Boolean);
+    names.forEach(name=>{
+      if(!byMentor[name]) byMentor[name] = [];
+      byMentor[name].push(r);
+    });
   });
 
   const mentorNames = Object.keys(byMentor).sort((a,b)=> a.localeCompare(b));
