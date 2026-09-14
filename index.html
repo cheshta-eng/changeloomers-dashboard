@@ -1321,7 +1321,8 @@ function applySheetData(data){
         mentor: String(r["Mentors"]||"").trim(),
         profileText: String(r["Profiles"]||"").trim(),
         filmLabel: String(r["Youtube Changelooms Film link"]||"").trim(),
-        pictureLink: String(r["Drive Picture Link"]||"").trim()
+        pictureLink: String(r["Drive Picture Link"]||"").trim(),
+        photoUrl: String(r["Photo URL"]||"").trim()
       }));
   }
 
@@ -2541,7 +2542,7 @@ function openRosterPointModal(type, year, count){
       : `<div class="roster-head" style="margin-top:18px;"><span>Cohort not specified</span><span></span></div>`;
     const rows = group.map(e=>{
       const profile = getProfile(e.anchor);
-      const clickable = profile || e.pictureLink;
+      const clickable = profile || e.pictureLink || e.photoUrl;
       const nameHtml = clickable
         ? `<span class="r-name" style="cursor:pointer; text-decoration:underline; text-decoration-style:dotted;" onclick="openProfileModal('${e.anchor.replace(/'/g,"\\'")}')">${e.anchor}</span>`
         : `<span class="r-name">${e.anchor}</span>`;
@@ -2562,15 +2563,18 @@ function openProfileModal(anchorName){
   const rosterMatch = ROSTER.find(r => normalizeProfileName(r.anchor) === norm);
   const profile = getProfile(anchorName);
   const pictureLink = rosterMatch ? rosterMatch.pictureLink : "";
+  const photoUrl = rosterMatch ? rosterMatch.photoUrl : "";
 
-  if(!profile && !pictureLink) return;
+  if(!profile && !pictureLink && !photoUrl) return;
 
   const uncertainNote = (profile && profile.certain === false)
     ? `<div class="pending-pill" style="margin-bottom:10px;">Not certain this is the same person — please verify</div>`
     : "";
-  const pictureRow = pictureLink
-    ? `<a href="${pictureLink}" target="_blank" rel="noopener" style="display:inline-block; margin-bottom:12px; color:var(--brown); font-weight:600; text-decoration:underline;">🖼️ View picture</a>`
-    : "";
+  const pictureRow = photoUrl
+    ? `<img src="${photoUrl}" alt="${anchorName}" style="width:100%; max-width:260px; border-radius:12px; display:block; margin:0 auto 14px;">`
+    : (pictureLink
+        ? `<a href="${pictureLink}" target="_blank" rel="noopener" style="display:inline-block; margin-bottom:12px; color:var(--brown); font-weight:600; text-decoration:underline;">🖼️ View picture</a>`
+        : "");
   const textBlock = profile
     ? `<p style="margin:0; line-height:1.65; color:var(--ink);">${profile.text}</p>`
     : "";
