@@ -302,6 +302,64 @@
     color:var(--teal-deep);
   }
 
+  /* ---------- DATA HYGIENE ---------- */
+  .hygiene-grid{
+    display:grid;
+    grid-template-columns:repeat(3,1fr);
+    gap:14px;
+  }
+  .hygiene-card{
+    background:var(--khadi);
+    border:1px solid var(--hairline);
+    border-radius:var(--radius);
+    padding:18px;
+  }
+  .hygiene-card .h-label{
+    font-family:'IBM Plex Mono', monospace;
+    font-size:11.5px;
+    text-transform:uppercase;
+    letter-spacing:0.06em;
+    color:var(--ink-soft);
+    margin-bottom:8px;
+  }
+  .hygiene-card .h-stat{
+    font-family:'Fraunces', serif;
+    font-size:22px;
+    font-weight:600;
+    color:var(--teal-deep);
+    margin-bottom:10px;
+    display:flex;
+    align-items:baseline;
+    gap:6px;
+    flex-wrap:wrap;
+  }
+  .hygiene-card .h-of{
+    font-size:14px;
+    font-weight:400;
+    color:var(--ink-soft);
+  }
+  .hygiene-card .h-pct{
+    font-family:'IBM Plex Mono', monospace;
+    font-size:12.5px;
+    font-weight:600;
+    color:var(--brown);
+    margin-left:auto;
+  }
+  .hygiene-bar-track{
+    height:8px;
+    border-radius:6px;
+    background:var(--hairline);
+    overflow:hidden;
+  }
+  .hygiene-bar-fill{
+    height:100%;
+    border-radius:6px;
+    background:var(--olive);
+    transition:width .3s ease;
+  }
+  .hygiene-bar-fill.low{background:var(--gold-deep);}
+  .hygiene-bar-fill.vlow{background:var(--brown);}
+
   /* ---------- CHART ---------- */
   .chart-shell{
     background:var(--khadi);
@@ -748,10 +806,10 @@
       <div class="nom-grid" id="nomGrid"></div>
     </section>
 
-    <section id="hubs">
-      <h2>Implementing hubs</h2>
-      <p class="section-sub">Built from the "Cohort" tab — which hub ran how many cohorts, in which years, for which programme type. Click a hub for the breakdown.</p>
-      <div class="funder-grid" id="hubOrgGrid"></div>
+    <section id="hygiene">
+      <h2>Data Hygiene</h2>
+      <p class="section-sub">How complete the roster is, column by column — computed live from every row in the "CL DATA CHESHTA" tab, so these numbers update automatically as more data is filled in.</p>
+      <div class="hygiene-grid" id="dataHygieneGrid"></div>
     </section>
 
     <section id="indiaMap">
@@ -1322,7 +1380,12 @@ function applySheetData(data){
         profileText: String(r["Profiles"]||"").trim(),
         filmLabel: String(r["Youtube Changelooms Film link"]||"").trim(),
         pictureLink: String(r["Drive Picture Link"]||"").trim(),
-        photoUrl: String(r["Photo URL"]||"").trim()
+        photoUrl: String(r["Photo URL"]||"").trim(),
+        contactNumber: String(r["Contact Number"]||"").trim(),
+        emailId: String(r["Email ID"]||"").trim(),
+        linkedin: String(r["LinkedIN ID"]||"").trim(),
+        socialActionProject: String(r["Social Action Project"]||"").trim(),
+        poc: String(r["POC"]||"").trim()
       }));
   }
 
@@ -1601,54 +1664,47 @@ function openFunderModal(f){
   });
 }
 
-/* ============ IMPLEMENTING HUBS (member orgs) ============ */
+/* ============ DATA HYGIENE (live fill-rate per column) ============ */
 
-function renderHubOrgs(){
-  const grid = document.getElementById("hubOrgGrid");
+function renderDataHygiene(){
+  const grid = document.getElementById("dataHygieneGrid");
+  if(!grid) return;
   grid.innerHTML = "";
 
-  const byHub = {};
-  Object.entries(COHORTS).forEach(([name, info])=>{
-    if(!info.hub) return;
-    if(!byHub[info.hub]) byHub[info.hub] = [];
-    byHub[info.hub].push({cohortName: name, year: info.year, type: info.type, funder: info.funder, driveLink: info.driveLink});
-  });
-
-  const hubNames = Object.keys(byHub).sort((a,b)=> a.localeCompare(b));
-  if(!hubNames.length){
-    grid.innerHTML = `<div class="pending-pill">No hubs recorded yet — check the "Cohort" tab's Hub column.</div>`;
+  const total = ROSTER.length;
+  if(!total){
+    grid.innerHTML = `<div class="pending-pill">No roster rows loaded yet — check the "CL DATA CHESHTA" tab.</div>`;
     return;
   }
 
-  hubNames.forEach(hubName=>{
-    const cohorts = byHub[hubName];
-    const years = Array.from(new Set(cohorts.map(c=> c.year).filter(Boolean))).sort();
-    const yearsLabel = years.length ? ` (${years.join(", ")})` : "";
-    const chip = document.createElement("div");
-    chip.className = "funder-chip";
-    chip.innerHTML = `${hubName}${yearsLabel}<span class="n">${cohorts.length} cohort${cohorts.length===1?"":"s"}</span>`;
-    chip.addEventListener("click", ()=> openHubOrgModal(hubName, cohorts));
-    grid.appendChild(chip);
-  });
-}
+  // one entry per column we want tracked — label is what's shown, key matches the ROSTER field
+  const fields = [
+    {key:"anchor",              label:"Names"},
+    {key:"org",                 label:"Organisation names"},
+    {key:"contactNumber",       label:"Phone numbers"},
+    {key:"emailId",             label:"Email IDs"},
+    {key:"location",            label:"Location / Address"},
+    {key:"state",               label:"State"},
+    {key:"photoUrl",            label:"Photo URLs"},
+    {key:"profileText",         label:"Profiles"},
+    {key:"mentor",              label:"Mentors"},
+    {key:"linkedin",            label:"LinkedIn IDs"},
+    {key:"socialActionProject", label:"Social Action Project"},
+    {key:"filmLabel",           label:"Film links"}
+  ];
 
-function openHubOrgModal(hubName, cohorts){
-  const rows = cohorts
-    .sort((a,b)=> String(a.year).localeCompare(String(b.year)))
-    .map(c=>{
-      const cohortDisplay = c.driveLink
-        ? `<a href="${c.driveLink}" target="_blank" rel="noopener" style="color:var(--brown); font-weight:600; text-decoration:underline;">${c.cohortName} \u2197</a>`
-        : c.cohortName;
-      return `<div class="modal-row"><span>${c.year}</span><span>${c.type}</span><span>${cohortDisplay}</span></div>`;
-    })
-    .join("");
-  openModal({
-    eyebrow: "Hub",
-    title: hubName + " · " + cohorts.length + " cohort" + (cohorts.length===1?"":"s"),
-    body: `
-      <div class="modal-row" style="font-weight:600;"><span>Year</span><span>Type</span><span>Cohort</span></div>
-      ${rows || `<div class="pending-pill">No cohorts linked to this hub yet</div>`}
-    `
+  fields.forEach(f=>{
+    const filled = ROSTER.filter(r => r[f.key] && String(r[f.key]).trim()).length;
+    const pct = Math.round((filled/total)*100);
+    const barClass = pct < 30 ? "vlow" : (pct < 60 ? "low" : "");
+    const card = document.createElement("div");
+    card.className = "hygiene-card";
+    card.innerHTML = `
+      <div class="h-label">${f.label}</div>
+      <div class="h-stat">${filled}<span class="h-of">of ${total}</span><span class="h-pct">${pct}%</span></div>
+      <div class="hygiene-bar-track"><div class="hygiene-bar-fill ${barClass}" style="width:${pct}%;"></div></div>
+    `;
+    grid.appendChild(card);
   });
 }
 
@@ -2399,7 +2455,7 @@ function openFilmModal(film){
 }
 
 async function render(){
-  const steps = [renderLegend, renderStats, renderFunders, renderNomCards, renderHubOrgs, renderRosterStats, renderRosterTrend, renderIndiaMap, renderMentors, renderFilms, renderNomBubbles, renderFunderBubbles, buildChart];
+  const steps = [renderLegend, renderStats, renderFunders, renderNomCards, renderDataHygiene, renderRosterStats, renderRosterTrend, renderIndiaMap, renderMentors, renderFilms, renderNomBubbles, renderFunderBubbles, buildChart];
   steps.forEach(step=>{
     try{ step(); }
     catch(err){ console.error(`${step.name}() failed — skipping so the rest of the page still renders:`, err); }
