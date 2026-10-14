@@ -32,7 +32,6 @@
 
 
 
-
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -132,6 +131,43 @@
     letter-spacing:0.03em;
     color:var(--lime);
   }
+  .preamble-dropdown{
+    margin-top:32px;
+    text-align:left;
+    border-top:1px solid rgba(255,253,246,0.22);
+    padding-top:18px;
+  }
+  .preamble-dropdown summary{
+    cursor:pointer;
+    list-style:none;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    gap:8px;
+    font-family:'IBM Plex Mono', monospace;
+    font-size:12.5px;
+    letter-spacing:0.08em;
+    text-transform:uppercase;
+    color:var(--lime);
+  }
+  .preamble-dropdown summary::-webkit-details-marker{display:none;}
+  .preamble-dropdown summary::after{
+    content:"+";
+    font-size:16px;
+    transition:transform .2s ease;
+  }
+  .preamble-dropdown[open] summary::after{transform:rotate(45deg);}
+  .preamble-dropdown-content{padding-top:20px;}
+  .preamble-dropdown-content p{
+    font-family:'IBM Plex Mono', monospace;
+    font-size:13.5px;
+    line-height:1.85;
+    color:rgba(255,253,246,0.86);
+    margin:0 0 16px;
+    text-align:left;
+  }
+  .preamble-dropdown-content p:last-child{margin-bottom:0;}
+  .preamble-dropdown-content strong{color:var(--lime); font-weight:600;}
 
   .story-dropdown{
     background:var(--khadi);
@@ -276,6 +312,21 @@
     font-size:15px;
     max-width:62ch;
     margin-bottom:26px;
+  }
+  .film-subhead{
+    font-family:'Fraunces', serif;
+    font-size:17px;
+    font-weight:600;
+    color:var(--teal-deep);
+    margin:0 0 12px;
+  }
+  .film-subhead-note{
+    font-family:'IBM Plex Mono', monospace;
+    font-size:11.5px;
+    font-weight:400;
+    letter-spacing:0.02em;
+    color:var(--ink-soft);
+    text-transform:none;
   }
 
   /* ---------- GLANCE CARDS ---------- */
@@ -789,6 +840,23 @@
 <div class="preamble-banner">
   <div class="preamble-inner">
     <blockquote>Where it Begins; Our Inspiration:</blockquote>
+
+    <blockquote style="margin-top:30px;">“Your passion and purpose inspire; It reflects the compelling vision in your deliberations and experiments. The pain in your heart compels your mind to share your time with others as one but you also worry. This worry in your head, and the desire in your body and soul to go out there and make a difference — to make a better world, to be a better person is infectious as a playful smile. Tell us: how can we walk with you in your journey? We have a lot of learnings to share, and a small resource in the form of a SMILE Fellowship of Rs 2,000 per month, to support your initiative in any way you wish.”
+      <cite>— Shivani Bhardwaj, IGSSS SMILE, New Delhi, 1994</cite>
+    </blockquote>
+
+    <details class="preamble-dropdown">
+      <summary>Read more</summary>
+      <div class="preamble-dropdown-content">
+        <p>It is well accepted that young people across the world need to be at the forefront of solving the knotty problems that beset humanity today. Indeed, in the last decade or so, social entrepreneurs have been feted by governments, corporate sector, and institutional funders. A British Council and Social Enterprise UK report in 2022 said there were 11 million social enterprises world-wide (India with 2 million is in the vanguard of this nascent movement; as many as 50 impact funds have come up since 2011 apart from a major uptick in institutional grants and fellowships). Francois Bonnici, Director for Social Enterprise in the Schwab foundation and Head of Social Innovation at the World Economic Forum calls it “one of the largest movements of our times driven by millions of people creating the organisations we need for the 21st Century”.</p>
+        <p>It’s also becoming quite evident that this movement can bring the real economy back in alignment with the runaway financial economy, by fulfilling real needs of consumers and also by creating millions of jobs. The same report also confirms that it is young people (25-44 years) who are leading this movement from the front.</p>
+        <p>But building social enterprise is easier said than done. A 2018 report by the Failure Institute provides the data for what our intuitive experience of 30 years in working with young social entrepreneurs is telling us. Only 17% of social enterprises last more than 3 years! The major reasons cited are lack of proper resources and low absorption of the “solution” by the context (“consumers”, communities, government, and other key stakeholders). In this note, we will focus on the second reason to make a case for the appropriate deployment of the first.</p>
+        <p>We believe the problem doesn’t lie in the social entrepreneur’s “solution”; it lies in how they (and the world, especially their funders) have defined and sized the problem. In fact, to call this sticky, interconnected web of paradoxes, a problem (whose solving, typically, takes a linear goal and milestone driven approach), is itself the problem. For example, to talk of climate change mitigation (where renewable energy is touted as the linear solution) without tackling the sky rocketing consumer norms like universal air conditioning, quick travel for work and pleasure, and e-ordering at the fingertips (leading to a packaging nightmare), is like wanting to be fit without changing our compromising lifestyle. These default systems run deep and strong.</p>
+        <p><strong>The 21st Century questions:</strong> Doesn’t it make sense for Social Entrepreneurs to stop pushing for producer led solutions alone and recognize the consumer side of the paradox? Haven’t these old defaults come in the way of the world adopting renewable at a faster pace? The “should” from a social standpoint is clear but still the “is” of our psychological defaults is holding us back. Further, can cultural norms be ignored in a renewable adoption thrust? Will just economic incentives be enough? How does a Social Entrepreneur deal with the asymmetry of power in a system where the lobbies that entrench these solid status quos have everything to lose if things change? These are some of the questions about the current context that need to be posed by the Social Entrepreneur who wants to “push” renewable energy (say), as they size up their work.</p>
+        <p>The sticky social “problems” that need solving today are really a jumble of paradoxes that need to be seen from a wholesome psycho-socio-eco-cultural lens. Thus we believe, the current spurt in incubations of social enterprises, in order to become a full blown sustainable movement, requires appropriate resourcing, not only for the direct SDG projects but even more crucially for co-creating enriching spaces where young people can co-develop their capacities to lead their communities and teams to solve for the sticky, interconnected paradoxes that underpin the SDGs.</p>
+        <p>We believe leaders are not born, they get formed in nurturing environments that they co-lead, where they can take ownership of self and society, where feelings are honoured, where risks can be taken and learning is grounded in reflex-action with peers and experts from outside their echo chambers.</p>
+      </div>
+    </details>
   </div>
 </div>
 
@@ -801,7 +869,7 @@
       <p class="section-sub">Built from the "Location / Address" column in the "CL DATA CHESHTA" tab, plotted on a real India state-boundary map. Click a state to see the organisations and anchors there.</p>
       <div class="chart-shell">
         <div style="position:relative;">
-          <div id="indiaMapWrap" style="max-width:900px; margin:0 auto;"></div>
+          <div id="indiaMapWrap" style="max-width:560px; margin:0 auto;"></div>
           <div id="indiaMapStats" style="position:absolute; top:6px; right:6px; background:var(--khadi-deep); border:1px solid var(--hairline); border-radius:12px; padding:14px 16px; min-width:190px;"></div>
         </div>
       </div>
@@ -809,8 +877,13 @@
 
     <section id="films">
       <h2>Changeloomers films</h2>
-      <p class="section-sub">Built from the "Youtube Changelooms Film link" column in "CL DATA CHESHTA". Click a film to see who's featured in it.</p>
-      <div class="funder-grid" id="filmGrid"></div>
+      <p class="section-sub">Built from the "Youtube Changelooms Film link" column in "CL DATA CHESHTA". Titles below show the video's real title plus the featured cohort's year. Click a film to see who's featured in it.</p>
+
+      <h3 class="film-subhead">Production films <span class="film-subhead-note">— by Pravah, CYC, Dhriiti</span></h3>
+      <div class="funder-grid" id="filmGridProduction"></div>
+
+      <h3 class="film-subhead" style="margin-top:30px;">Changeloomers video bytes <span class="film-subhead-note">— made by Changeloomers themselves</span></h3>
+      <div class="funder-grid" id="filmGridBytes"></div>
     </section>
 
     <section id="rosterTrend">
@@ -828,16 +901,16 @@
       </div>
     </section>
 
-    <section id="funders">
-      <h2>Partners &amp; funders (TBC)</h2>
-      <p class="section-sub">Every organisation that has co-funded or hosted a Changeloomers cohort. Click a name for the years it was involved.</p>
-      <div class="funder-grid" id="funderGrid"></div>
-    </section>
-
     <section id="nomenclatures">
       <h2>Nomenclature shifting · entry &amp; exit (TBC)</h2>
       <p class="section-sub">Each nomenclature is its own leadership track for Changeloomers — some ran in parallel, some merged, some closed and were succeeded. Click a card for the full story.</p>
       <div class="nom-grid" id="nomGrid"></div>
+    </section>
+
+    <section id="funders">
+      <h2>Partners &amp; funders (TBC)</h2>
+      <p class="section-sub">Every organisation that has co-funded or hosted a Changeloomers cohort. Click a name for the years it was involved. Grouped here with Mentors, as both are still ongoing to collate.</p>
+      <div class="funder-grid" id="funderGrid"></div>
     </section>
 
     <section id="mentors">
@@ -888,6 +961,9 @@
       <h2>Internal team info</h2>
       <p class="section-sub">How complete the roster is, column by column — computed live from every row in the "CL DATA CHESHTA" tab, so these numbers update automatically as more data is filled in.</p>
       <div class="hygiene-grid" id="dataHygieneGrid"></div>
+      <div style="margin-top:26px;">
+        <div id="indiaMapDiag" style="font-family:'IBM Plex Mono', monospace; font-size:11px; color:var(--ink-soft); line-height:1.6; background:var(--khadi-deep); border:1px solid var(--hairline); border-radius:12px; padding:14px 16px;"></div>
+      </div>
     </section>
 
   </main>
@@ -2231,14 +2307,8 @@ async function renderIndiaMap(){
   const wrap = document.getElementById("indiaMapWrap");
   if(!wrap) return;
 
-  // Diagnostic line rendered directly on the page — no dev tools needed.
-  let diag = document.getElementById("indiaMapDiag");
-  if(!diag){
-    diag = document.createElement("div");
-    diag.id = "indiaMapDiag";
-    diag.style.cssText = "margin-top:10px; font-family:'IBM Plex Mono', monospace; font-size:11px; color:#6B6255; line-height:1.6;";
-    wrap.parentNode.insertBefore(diag, wrap.nextSibling);
-  }
+  // Diagnostic line — lives in the "Internal team info" section at the bottom of the page, not on the map itself.
+  const diag = document.getElementById("indiaMapDiag");
 
   if(!ROSTER.length){
     wrap.innerHTML = `<div class="pending-pill">No data yet — check the "CL DATA CHESHTA" tab.</div>`;
@@ -2299,9 +2369,10 @@ async function renderIndiaMap(){
       const count = entries.length;
       if(count) matchedCount++;
 
+      // one solid colour for "has Changeloomers", one flat neutral for "none yet" —
+      // the number label (not the shade) is what shows the actual count.
       if(count){
-        const intensity = 0.55 + 0.45 * (count / maxCount);
-        path.style.fill = `rgba(217,151,29, ${intensity})`;
+        path.style.fill = "#6B8E4E"; /* olive — matches the site's "healthy/filled" colour elsewhere */
       } else {
         path.style.fill = "rgba(61,54,47,0.06)";
       }
@@ -2320,16 +2391,16 @@ async function renderIndiaMap(){
           const cx = box.x + box.width/2;
           const cy = box.y + box.height/2;
           const circle = document.createElementNS("http://www.w3.org/2000/svg","circle");
-          circle.setAttribute("cx", cx); circle.setAttribute("cy", cy); circle.setAttribute("r", 9);
+          circle.setAttribute("cx", cx); circle.setAttribute("cy", cy); circle.setAttribute("r", 13);
           circle.setAttribute("fill", "#2B241F");
           circle.setAttribute("stroke", "#FFFDF6");
-          circle.setAttribute("stroke-width", "1");
+          circle.setAttribute("stroke-width", "1.2");
           circle.style.pointerEvents = "none";
           const label = document.createElementNS("http://www.w3.org/2000/svg","text");
-          label.setAttribute("x", cx); label.setAttribute("y", cy + 3.5);
+          label.setAttribute("x", cx); label.setAttribute("y", cy + 4.5);
           label.setAttribute("text-anchor", "middle");
           label.setAttribute("font-family", "IBM Plex Mono, monospace");
-          label.setAttribute("font-size", "9");
+          label.setAttribute("font-size", "13");
           label.setAttribute("font-weight", "700");
           label.setAttribute("fill", "#FFFDF6");
           label.style.pointerEvents = "none";
@@ -2449,37 +2520,26 @@ function fetchYouTubeTitle(url){
   return p;
 }
 
-function renderFilms(){
-  const grid = document.getElementById("filmGrid");
-  if(!grid) return;
-  grid.innerHTML = "";
+// Films are split into two folders. Since the sheet doesn't have an explicit
+// "who made this" column yet, we classify by looking for the production houses'
+// names in the film's own label or in the organisations of the people featured in it.
+// Anything that doesn't match is treated as a self-made "video byte".
+const PRODUCTION_HOUSE_KEYWORDS = ["pravah", "cyc", "dhriiti"];
+function classifyFilm(film){
+  const haystack = [
+    film.label,
+    ...film.people.map(p => p.org || "")
+  ].join(" ").toLowerCase();
+  return PRODUCTION_HOUSE_KEYWORDS.some(kw => haystack.includes(kw)) ? "production" : "bytes";
+}
 
-  const entries = ROSTER.filter(r => r.filmLabel);
-  if(!entries.length){
-    grid.innerHTML = `<div class="pending-pill">No films recorded yet — check the "Youtube Changelooms Film link" column in "CL DATA CHESHTA".</div>`;
+function renderFilmGroup(grid, films, emptyMessage){
+  grid.innerHTML = "";
+  if(!films.length){
+    grid.innerHTML = `<div class="pending-pill">${emptyMessage}</div>`;
     return;
   }
-
-  const byFilm = {};
-  const filmOrder = [];
-  entries.forEach(r=>{
-    const key = r.filmLabel;
-    if(!byFilm[key]){ byFilm[key] = { label: key, people: [] }; filmOrder.push(key); }
-    byFilm[key].people.push(r);
-  });
-
-  filmOrder.forEach(key=>{
-    const film = byFilm[key];
-
-    // "year of cohort" — first non-empty batch (falls back to cohort) among this film's people
-    const batchPerson = film.people.find(p => p.batch);
-    const cohortPerson = film.people.find(p => p.cohort);
-    film.year = (batchPerson && batchPerson.batch) || (cohortPerson && cohortPerson.cohort) || "";
-
-    // match this film's sheet label to a real YouTube URL from the "films" data, if present
-    const match = FILMS.find(f => f.label && f.label === film.label);
-    film.url = match ? match.url : "";
-
+  films.forEach(film=>{
     const chip = document.createElement("div");
     chip.className = "funder-chip";
     chip.innerHTML = `<span class="film-title">${film.label}</span>` +
@@ -2499,6 +2559,49 @@ function renderFilms(){
       });
     }
   });
+}
+
+function renderFilms(){
+  const prodGrid = document.getElementById("filmGridProduction");
+  const bytesGrid = document.getElementById("filmGridBytes");
+  if(!prodGrid || !bytesGrid) return;
+
+  const entries = ROSTER.filter(r => r.filmLabel);
+  if(!entries.length){
+    const msg = `No films recorded yet — check the "Youtube Changelooms Film link" column in "CL DATA CHESHTA".`;
+    prodGrid.innerHTML = `<div class="pending-pill">${msg}</div>`;
+    bytesGrid.innerHTML = "";
+    return;
+  }
+
+  const byFilm = {};
+  const filmOrder = [];
+  entries.forEach(r=>{
+    const key = r.filmLabel;
+    if(!byFilm[key]){ byFilm[key] = { label: key, people: [] }; filmOrder.push(key); }
+    byFilm[key].people.push(r);
+  });
+
+  const productionFilms = [];
+  const bytesFilms = [];
+
+  filmOrder.forEach(key=>{
+    const film = byFilm[key];
+
+    // "year of cohort" — first non-empty batch (falls back to cohort) among this film's people
+    const batchPerson = film.people.find(p => p.batch);
+    const cohortPerson = film.people.find(p => p.cohort);
+    film.year = (batchPerson && batchPerson.batch) || (cohortPerson && cohortPerson.cohort) || "";
+
+    // match this film's sheet label to a real YouTube URL from the "films" data, if present
+    const match = FILMS.find(f => f.label && f.label === film.label);
+    film.url = match ? match.url : "";
+
+    (classifyFilm(film) === "production" ? productionFilms : bytesFilms).push(film);
+  });
+
+  renderFilmGroup(prodGrid, productionFilms, `No production films matched yet — titles are checked for "Pravah", "CYC" or "Dhriiti".`);
+  renderFilmGroup(bytesGrid, bytesFilms, `No self-made video bytes yet.`);
 }
 
 function openFilmModal(film){
