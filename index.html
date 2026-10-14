@@ -2556,6 +2556,17 @@ function fetchYouTubeTitle(url){
 // "who made this" column yet, we classify by looking for the production houses'
 // names in the film's own label or in the organisations of the people featured in it.
 // Anything that doesn't match is treated as a self-made "video byte".
+// Manual title overrides for links where the real title can't be auto-fetched
+// (private/unlisted YouTube videos, or non-YouTube links like Facebook) — keyed by
+// the exact text as it appears in the "Youtube Changelooms Film link" column.
+const FILM_TITLE_OVERRIDES = {
+  "https://www.youtube.com/watch?v=g6EJQ1tGw6I": "Abhishek: Alternative Realities Story",
+  "https://www.youtube.com/watch?v=j_FW2HAZuv4": "Sri Arunodayam - One Day in the Life of Mentally Challenged Children",
+  "https://www.youtube.com/watch?v=7NOCm5sBH5Q": "Vayali Bamboo Orchestra",
+  "https://www.youtube.com/watch?v=xvPdjYBE6OI": "Space for Nurturing Creativity I Shyamavan",
+  "https://www.facebook.com/kamya.dargan.3": "Kamya Dargan"
+};
+
 const PRODUCTION_HOUSE_KEYWORDS = ["pravah", "cyc", "dhriiti"];
 function classifyFilm(film){
   const haystack = [
@@ -2572,6 +2583,11 @@ function renderFilmGroup(grid, films, emptyMessage){
     return;
   }
   films.forEach(film=>{
+    // apply manual override first (covers unlisted/private videos and non-YouTube links
+    // that can't be auto-fetched), before trying anything else
+    const override = FILM_TITLE_OVERRIDES[String(film.label).trim()] || FILM_TITLE_OVERRIDES[String(film.url).trim()];
+    if(override) film.label = override;
+
     const chip = document.createElement("div");
     chip.className = "funder-chip";
     chip.innerHTML = `<span class="film-title">${film.label}</span>` +
@@ -2580,9 +2596,11 @@ function renderFilmGroup(grid, films, emptyMessage){
     chip.addEventListener("click", ()=> openFilmModal(film));
     grid.appendChild(chip);
 
-    // if we have a real YouTube link, swap the display text for the video's actual title
+    // if we don't have an override and this is a real YouTube link, try to fetch the
+    // actual video title live (works for public videos; silently leaves the sheet's
+    // text in place if the video is unlisted/private/removed)
     const ytId = extractYouTubeId(film.url);
-    if(ytId){
+    if(!override && ytId){
       fetchYouTubeTitle(film.url).then(title=>{
         if(!title) return;
         film.label = title; // so the modal title matches too
